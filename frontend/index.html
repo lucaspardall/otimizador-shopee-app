@@ -106,6 +106,7 @@
             border-radius: 0.375rem;
             transition: background-color 0.2s, color 0.2s;
             border: 1px solid transparent;
+            cursor: pointer;
         }
         .view-nav-button:hover {
             background-color: #2d3748;
@@ -120,6 +121,11 @@
         }
         .view-section.active {
             display: block;
+        }
+        /* Estilo para botão desabilitado */
+        button:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
         }
 
     </style>
@@ -309,36 +315,78 @@
              displayMessage('A funcionalidade de criação de novos anúncios está em desenvolvimento e será implementada em breve!', 'info');
         });
 
-        // Funções Utilitárias (mantidas)
-        function copyToClipboard(elementId, buttonId) {
+        // ============================================================
+        // == FUNÇÃO copyToClipboard ATUALIZADA para usar Clipboard API ==
+        // ============================================================
+        async function copyToClipboard(elementId, buttonId) {
             const element = document.getElementById(elementId);
-            let textToCopy;
+            let textToCopy = '';
+
+            // Pega o texto do elemento (seja textarea ou div)
             if (element.nodeName === 'TEXTAREA' || element.nodeName === 'INPUT') {
-                element.select(); textToCopy = element.value;
+                textToCopy = element.value;
             } else {
                 textToCopy = element.textContent;
-                const range = document.createRange(); range.selectNodeContents(element);
-                const selection = window.getSelection(); selection.removeAllRanges(); selection.addRange(range);
             }
+
+            // Verifica se a Clipboard API está disponível (necessário para HTTPS ou localhost)
+            if (!navigator.clipboard) {
+                console.error('Clipboard API não disponível. Use HTTPS ou localhost.');
+                // Fallback para o método antigo (pode não funcionar devido a CSP)
+                try {
+                    const textArea = document.createElement("textarea");
+                    textArea.value = textToCopy;
+                    document.body.appendChild(textArea);
+                    textArea.focus();
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    // Atualiza o botão (feedback visual)
+                    updateCopyButton(buttonId, true);
+                } catch (err) {
+                    console.error('Fallback execCommand falhou:', err);
+                    updateCopyButton(buttonId, false); // Indica falha no botão
+                }
+                return;
+            }
+
+            // Tenta usar a Clipboard API moderna
             try {
-                 document.execCommand('copy');
-                 const button = document.getElementById(buttonId);
-                 if (button) {
-                     const originalText = button.textContent; button.textContent = 'Copiado!';
-                     button.classList.remove('hover:bg-orange-500'); button.classList.add('bg-green-500', 'text-white');
-                     setTimeout(() => {
-                         button.textContent = originalText;
-                         button.classList.remove('bg-green-500', 'text-white'); button.classList.add('hover:bg-orange-500');
-                         if (window.getSelection) window.getSelection().removeAllRanges();
-                     }, 2000);
-                 }
+                await navigator.clipboard.writeText(textToCopy);
+                // Atualiza o botão (feedback visual)
+                updateCopyButton(buttonId, true); // Indica sucesso
             } catch (err) {
-                console.error('Erro ao copiar texto: ', err);
-                // Poderia mostrar uma mensagem de erro para o usuário aqui
-            } finally {
-                 if (window.getSelection) window.getSelection().removeAllRanges(); // Limpa a seleção de qualquer forma
+                console.error('Erro ao copiar com a Clipboard API:', err);
+                updateCopyButton(buttonId, false); // Indica falha
             }
         }
+
+        // Função auxiliar para atualizar o botão de copiar
+        function updateCopyButton(buttonId, success) {
+             const button = document.getElementById(buttonId);
+             if (button) {
+                 const originalText = "Copiar"; // Define o texto original aqui
+                 if (success) {
+                     button.textContent = 'Copiado!';
+                     button.classList.remove('hover:bg-orange-500');
+                     button.classList.add('bg-green-500', 'text-white');
+                 } else {
+                     button.textContent = 'Falhou!';
+                     button.classList.remove('hover:bg-orange-500');
+                     button.classList.add('bg-red-500', 'text-white');
+                 }
+                 // Volta ao normal depois de 2 segundos
+                 setTimeout(() => {
+                     button.textContent = originalText;
+                     button.classList.remove('bg-green-500', 'bg-red-500', 'text-white');
+                     button.classList.add('hover:bg-orange-500');
+                 }, 2000);
+             }
+        }
+        // ============================================================
+        // == FIM DA FUNÇÃO copyToClipboard ATUALIZADA                ==
+        // ============================================================
+
 
         function updateCharCounter(textareaElement, counterElement) {
             if(textareaElement && counterElement){
@@ -351,9 +399,7 @@
             const counterId = textarea.id + 'Counter';
             const counterElement = document.getElementById(counterId);
             if (counterElement) {
-                // Usar 'input' para pegar digitação e colar
                 textarea.addEventListener('input', () => updateCharCounter(textarea, counterElement));
-                // Chamada inicial
                 updateCharCounter(textarea, counterElement);
             }
         });
@@ -371,7 +417,7 @@
         }
 
         function getInsightStyling(type) {
-             switch (String(type).toLowerCase()) { // Adicionado String() para segurança
+             switch (String(type).toLowerCase()) {
                 case 'attention': return { typeClass: 'insight-attention', iconSVG: icons.attention, defaultTitle: "Ponto de Atenção" };
                 case 'opportunity': return { typeClass: 'insight-opportunity', iconSVG: icons.opportunity, defaultTitle: "Oportunidade Identificada" };
                 case 'suggestion': return { typeClass: 'insight-suggestion', iconSVG: icons.suggestion, defaultTitle: "Sugestão de Melhoria" };
@@ -380,7 +426,7 @@
             }
         }
 
-        // Função Principal de Otimização
+        // Função Principal de Otimização (mantida como na v1.7)
         optimizeButton.addEventListener('click', async () => {
             const link = shopeeLinkInput.value.trim();
             messageArea.textContent = ''; messageArea.className = 'text-center my-4 p-3 rounded-lg text-sm';
@@ -389,21 +435,17 @@
             // Validação do Link
             if (!link) { displayMessage('Por favor, insira um link da Shopee.', 'error'); return; }
             try {
-                 const urlObject = new URL(link); // Tenta criar um objeto URL
-                 if (!urlObject.hostname.includes('shopee.com')) { // Verifica se o domínio é da Shopee
+                 const urlObject = new URL(link);
+                 if (!urlObject.hostname.includes('shopee.com')) {
                       throw new Error('Não é um link da Shopee.');
                  }
             }
             catch (_) { displayMessage('Link inválido ou não é da Shopee.', 'error'); return; }
 
-            // Feedback visual de carregamento
             loader.style.display = 'block'; optimizeButton.disabled = true;
             optimizeButton.textContent = 'Analisando...';
-            optimizeButton.classList.add('opacity-70', 'cursor-not-allowed');
+            optimizeButton.classList.add('opacity-70'); // Removido cursor-not-allowed para consistência com :disabled
 
-            // #####################################################################
-            // ## LÓGICA DE FETCH PARA O BACKEND                                  ##
-            // #####################################################################
             try {
                 // =======================================================================================
                 // == IMPORTANTE: CONFIRME E ATUALIZE ESTA URL PARA O SEU BACKEND NO RENDER.COM ==
@@ -420,23 +462,18 @@
                     body: JSON.stringify({ shopeeProductUrl: link }),
                 });
 
-                const resultado = await response.json(); // Tenta parsear a resposta como JSON
+                const resultado = await response.json();
 
-                // Verifica se a resposta HTTP foi bem-sucedida (status 2xx)
                 if (!response.ok) {
                     console.error("Erro do backend (HTTP não OK):", resultado);
-                    // Usa a mensagem do JSON se disponível, senão o statusText da resposta
                     displayMessage(resultado.mensagem || response.statusText || `Erro ${response.status} do servidor.`, 'error');
-                    // Lança um erro para ser pego pelo catch principal
                     throw new Error(resultado.mensagem || `Erro HTTP ${response.status}`);
                 }
 
-                // Verifica o status da aplicação retornado no JSON
                 if (resultado.status === "sucesso") {
                     displayMessage(resultado.mensagem || 'Análise concluída!', 'success');
 
                     // Preenche os dados recebidos do backend
-                    // Usando operador '||' para fallback caso o campo não exista na resposta
                     originalPriceEl.textContent = resultado.dadosOriginais?.precoOriginal || 'N/A';
                     originalCategoryEl.textContent = resultado.dadosOriginais?.categoriaOriginal || 'N/A';
                     originalRatingEl.textContent = resultado.dadosOriginais?.avaliacaoMediaOriginal || 'N/A';
@@ -456,27 +493,25 @@
                     updateCharCounter(optimizedDescriptionTextarea, optimizedDescriptionCounter);
 
                     // Preenche insights da IA
-                    aiInsightsListEl.innerHTML = ''; // Limpa a lista
+                    aiInsightsListEl.innerHTML = '';
                     if (resultado.insightsDaIA && Array.isArray(resultado.insightsDaIA) && resultado.insightsDaIA.length > 0) {
                         resultado.insightsDaIA.forEach(insight => {
-                            // Verifica se 'insight' é um objeto antes de acessar propriedades
                             if (typeof insight === 'object' && insight !== null) {
-                                const styling = getInsightStyling(insight.type); // Passa o tipo para estilização
+                                const styling = getInsightStyling(insight.type);
                                 const li = document.createElement('li');
                                 li.className = `insight-card ${styling.typeClass}`;
-
+                                
                                 const headerDiv = document.createElement('div');
                                 headerDiv.className = 'insight-header';
                                 headerDiv.innerHTML = styling.iconSVG + `<span class="insight-title">${insight.title || styling.defaultTitle}</span>`;
 
                                 const descriptionDiv = document.createElement('div');
                                 descriptionDiv.className = 'insight-description';
-                                descriptionDiv.innerHTML = insight.description || ''; // Usa innerHTML para permitir tags
+                                descriptionDiv.innerHTML = insight.description || '';
 
                                 li.appendChild(headerDiv);
                                 li.appendChild(descriptionDiv);
 
-                                // Adiciona detalhes se existirem
                                 if (insight.shortTermAction || insight.estimatedImpact) {
                                     const detailsDiv = document.createElement('div');
                                     detailsDiv.className = 'insight-details';
@@ -494,33 +529,26 @@
                             }
                         });
                     } else {
-                        // Nenhuma mensagem aqui, pois a lista vazia já indica isso visualmente
                          aiInsightsListEl.innerHTML = '<li class="italic text-slate-500 insight-card">Nenhum insight adicional fornecido pela IA.</li>';
                     }
 
-                    contentDisplayArea.classList.remove('hidden'); // Mostra a área de conteúdo
+                    contentDisplayArea.classList.remove('hidden');
 
-                } else { // Se o status HTTP foi OK, mas a aplicação retornou erro no JSON
+                } else {
                     displayMessage(resultado.mensagem || 'Ocorreu um erro no processamento do backend.', 'error');
                 }
 
             } catch (error) {
-                // Captura erros de rede (fetch falhou) ou erros lançados manualmente (ex: !response.ok)
                 console.error("Erro durante o fetch ou processamento da resposta:", error);
-                // Mostra mensagem de erro genérica se nenhuma mensagem específica foi definida antes
                 if (!messageArea.textContent || messageArea.textContent.toLowerCase().includes('analisando')) {
                      displayMessage('Falha na comunicação com o servidor. Verifique sua conexão ou a URL do backend.', 'error');
                 }
             } finally {
-                // Garante que o loader seja escondido e o botão reabilitado
                 loader.style.display = 'none';
                 optimizeButton.disabled = false;
                 optimizeButton.textContent = 'Analisar e Otimizar';
-                optimizeButton.classList.remove('opacity-70', 'cursor-not-allowed');
+                optimizeButton.classList.remove('opacity-70');
             }
-            // #####################################################################
-            // ## FIM DA LÓGICA DE FETCH                                          ##
-            // #####################################################################
         });
 
         // Função para exibir mensagens (mantida)
