@@ -6,6 +6,7 @@
     <title>Assistente Inteligente Shopee</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        /* Estilos CSS (mantidos como na versão anterior) */
         body {
             font-family: 'Inter', sans-serif;
         }
@@ -144,27 +145,27 @@
         </div>
 
         <div id="optimizeViewSection" class="view-section active">
-            <p class="text-slate-400 text-center mb-4 text-sm">Cole o link do seu produto Shopee abaixo para otimizar título, descrição e receber insights estratégicos.</p>
-            <div class="mb-6">
-                <label for="shopeeLink" class="block text-sm font-medium text-slate-300 mb-1">Link do Produto para Análise:</label>
-                <input type="url" id="shopeeLink" name="shopeeLink"
-                       class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-gray-100 focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all"
-                       placeholder="https://shopee.com.br/seu-produto...">
-            </div>
+           <p class="text-slate-400 text-center mb-4 text-sm">Cole o link do seu produto Shopee abaixo para otimizar título, descrição e receber insights estratégicos.</p>
+           <div class="mb-6">
+               <label for="shopeeLink" class="block text-sm font-medium text-slate-300 mb-1">Link do Produto para Análise:</label>
+               <input type="url" id="shopeeLink" name="shopeeLink"
+                      class="w-full px-4 py-3 bg-slate-700 border border-slate-600 rounded-lg text-gray-100 focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none transition-all"
+                      placeholder="https://shopee.com.br/seu-produto...">
+           </div>
 
-            <div class="mb-6 text-center">
-                <button id="optimizeButton"
-                        class="bg-gradient-to-r from-orange-500 to-pink-600 hover:from-orange-600 hover:to-pink-700 text-white font-semibold py-3 px-8 rounded-lg shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-opacity-50">
-                    Analisar e Otimizar
-                </button>
-            </div>
+           <div class="mb-6 text-center">
+               <button id="optimizeButton"
+                       class="bg-gradient-to-r from-orange-500 to-pink-600 hover:from-orange-600 hover:to-pink-700 text-white font-semibold py-3 px-8 rounded-lg shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-300 ease-in-out focus:outline-none focus:ring-2 focus:ring-pink-500 focus:ring-opacity-50">
+                   Analisar e Otimizar
+               </button>
+           </div>
 
-            <div id="loader" class="loader"></div>
-            <div id="messageArea" class="text-center my-4 p-3 rounded-lg text-sm"></div>
+           <div id="loader" class="loader"></div>
+           <div id="messageArea" class="text-center my-4 p-3 rounded-lg text-sm"></div>
 
-            <div id="contentDisplayArea" class="mt-8 space-y-8 hidden">
-                <section id="originalDataSection">
-                    <h2 class="text-2xl font-semibold text-slate-300 mb-4 border-b border-slate-700 pb-2">Diagnóstico do Anúncio Atual</h2>
+           <div id="contentDisplayArea" class="mt-8 space-y-8 hidden">
+               <section id="originalDataSection">
+                   <h2 class="text-2xl font-semibold text-slate-300 mb-4 border-b border-slate-700 pb-2">Diagnóstico do Anúncio Atual</h2>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
                         <div><div class="data-label">Preço Atual:</div><div id="originalPrice" class="data-field">N/A</div></div>
                         <div><div class="data-label">Categoria:</div><div id="originalCategory" class="data-field">N/A</div></div>
@@ -191,10 +192,10 @@
                             <div id="originalDescriptionCounter" class="char-counter">0 caracteres</div>
                         </div>
                     </div>
-                </section>
+               </section>
 
-                <section id="optimizedDataSection">
-                    <h2 class="text-2xl font-semibold text-slate-300 mb-4 border-b border-slate-700 pb-2">Sugestões Otimizadas pela IA</h2>
+               <section id="optimizedDataSection">
+                   <h2 class="text-2xl font-semibold text-slate-300 mb-4 border-b border-slate-700 pb-2">Sugestões Otimizadas pela IA</h2>
                     <div class="space-y-6">
                         <div>
                             <h3 class="text-lg font-medium text-slate-400 mb-1">Novo Título Sugerido:</h3>
@@ -213,19 +214,19 @@
                             <div id="optimizedDescriptionCounter" class="char-counter">0 caracteres</div>
                         </div>
                     </div>
-                </section>
+               </section>
 
-                <section id="aiInsightsSection">
-                    <h2 class="text-2xl font-semibold text-slate-300 mb-4 border-b border-slate-700 pb-2">Recomendações Estratégicas da IA</h2>
+               <section id="aiInsightsSection">
+                   <h2 class="text-2xl font-semibold text-slate-300 mb-4 border-b border-slate-700 pb-2">Recomendações Estratégicas da IA</h2>
                     <ul id="aiInsightsList" class="space-y-3">
                         <li class="italic text-slate-500 insight-card">Nenhum insight disponível no momento.</li>
                     </ul>
-                </section>
-            </div>
+               </section>
+           </div>
         </div>
 
         <div id="createViewSection" class="view-section">
-            <div class="text-center p-10 border-2 border-dashed border-slate-600 rounded-lg">
+           <div class="text-center p-10 border-2 border-dashed border-slate-600 rounded-lg">
                 <svg class="mx-auto h-12 w-12 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                     <path vector-effect="non-scaling-stroke" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m-9 1V7a2 2 0 012-2h6l2 2h6a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2z" />
                 </svg>
@@ -250,14 +251,13 @@
     </footer>
 
     <script>
+        // Variáveis Globais e Elementos do DOM (mantidos)
         document.getElementById('currentYear').textContent = new Date().getFullYear();
-
         const navOptimizeViewBtn = document.getElementById('navOptimizeView');
         const navCreateViewBtn = document.getElementById('navCreateView');
         const optimizeViewSection = document.getElementById('optimizeViewSection');
         const createViewSection = document.getElementById('createViewSection');
         const startCreateNewAdButton = document.getElementById('startCreateNewAdButton');
-
         const originalPriceEl = document.getElementById('originalPrice');
         const originalCategoryEl = document.getElementById('originalCategory');
         const originalRatingEl = document.getElementById('originalRating');
@@ -279,6 +279,7 @@
         const optimizedTitleCounter = document.getElementById('optimizedTitleCounter');
         const optimizedDescriptionCounter = document.getElementById('optimizedDescriptionCounter');
 
+        // Definição dos Ícones (mantida)
         const icons = {
             attention: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>`,
             opportunity: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>`,
@@ -286,6 +287,7 @@
             tip: `<svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 18.375a6.375 6.375 0 006.375-6.375H5.625A6.375 6.375 0 0012 18.375zM12 2.25A6.375 6.375 0 005.625 8.625v3.75a6.375 6.375 0 006.375 6.375V2.25z" /></svg>`
         };
 
+        // Função para trocar de visualização (mantida)
         function switchView(viewToShow) {
             if (viewToShow === 'optimize') {
                 optimizeViewSection.classList.add('active');
@@ -300,13 +302,14 @@
             }
         }
 
+        // Listeners para botões de navegação (mantidos)
         navOptimizeViewBtn.addEventListener('click', () => switchView('optimize'));
         navCreateViewBtn.addEventListener('click', () => switchView('create'));
         startCreateNewAdButton.addEventListener('click', () => {
              displayMessage('A funcionalidade de criação de novos anúncios está em desenvolvimento e será implementada em breve!', 'info');
         });
 
-
+        // Funções Utilitárias (mantidas)
         function copyToClipboard(elementId, buttonId) {
             const element = document.getElementById(elementId);
             let textToCopy;
@@ -317,31 +320,40 @@
                 const range = document.createRange(); range.selectNodeContents(element);
                 const selection = window.getSelection(); selection.removeAllRanges(); selection.addRange(range);
             }
-            document.execCommand('copy');
-            const button = document.getElementById(buttonId);
-            if (button) {
-                const originalText = button.textContent; button.textContent = 'Copiado!';
-                button.classList.remove('hover:bg-orange-500'); button.classList.add('bg-green-500', 'text-white');
-                setTimeout(() => {
-                    button.textContent = originalText;
-                    button.classList.remove('bg-green-500', 'text-white'); button.classList.add('hover:bg-orange-500');
-                    if (window.getSelection) window.getSelection().removeAllRanges();
-                }, 2000);
+            try {
+                 document.execCommand('copy');
+                 const button = document.getElementById(buttonId);
+                 if (button) {
+                     const originalText = button.textContent; button.textContent = 'Copiado!';
+                     button.classList.remove('hover:bg-orange-500'); button.classList.add('bg-green-500', 'text-white');
+                     setTimeout(() => {
+                         button.textContent = originalText;
+                         button.classList.remove('bg-green-500', 'text-white'); button.classList.add('hover:bg-orange-500');
+                         if (window.getSelection) window.getSelection().removeAllRanges();
+                     }, 2000);
+                 }
+            } catch (err) {
+                console.error('Erro ao copiar texto: ', err);
+                // Poderia mostrar uma mensagem de erro para o usuário aqui
+            } finally {
+                 if (window.getSelection) window.getSelection().removeAllRanges(); // Limpa a seleção de qualquer forma
             }
-            if (window.getSelection) window.getSelection().removeAllRanges();
         }
 
         function updateCharCounter(textareaElement, counterElement) {
-            const count = textareaElement.value.length;
-            counterElement.textContent = `${count} caracteres`;
+            if(textareaElement && counterElement){
+                 const count = textareaElement.value.length;
+                 counterElement.textContent = `${count} caracteres`;
+            }
         }
 
         [originalTitleTextarea, originalDescriptionTextarea, optimizedTitleTextarea, optimizedDescriptionTextarea].forEach(textarea => {
             const counterId = textarea.id + 'Counter';
             const counterElement = document.getElementById(counterId);
             if (counterElement) {
-                new MutationObserver(() => updateCharCounter(textarea, counterElement))
-                    .observe(textarea, { attributes: true, childList: true, subtree: true, characterData: true, attributeFilter: ['value'] });
+                // Usar 'input' para pegar digitação e colar
+                textarea.addEventListener('input', () => updateCharCounter(textarea, counterElement));
+                // Chamada inicial
                 updateCharCounter(textarea, counterElement);
             }
         });
@@ -353,11 +365,13 @@
             originalTitleTextarea.value = ''; originalDescriptionTextarea.value = '';
             optimizedTitleTextarea.value = ''; optimizedDescriptionTextarea.value = '';
             aiInsightsListEl.innerHTML = '<li class="italic text-slate-500 insight-card">Nenhum insight disponível no momento.</li>';
-            [originalTitleCounter, originalDescriptionCounter, optimizedTitleCounter, optimizedDescriptionCounter].forEach(el => el.textContent = '0 caracteres');
+            [originalTitleCounter, originalDescriptionCounter, optimizedTitleCounter, optimizedDescriptionCounter].forEach(el => {
+                if (el) el.textContent = '0 caracteres';
+            });
         }
 
         function getInsightStyling(type) {
-             switch (type.toLowerCase()) {
+             switch (String(type).toLowerCase()) { // Adicionado String() para segurança
                 case 'attention': return { typeClass: 'insight-attention', iconSVG: icons.attention, defaultTitle: "Ponto de Atenção" };
                 case 'opportunity': return { typeClass: 'insight-opportunity', iconSVG: icons.opportunity, defaultTitle: "Oportunidade Identificada" };
                 case 'suggestion': return { typeClass: 'insight-suggestion', iconSVG: icons.suggestion, defaultTitle: "Sugestão de Melhoria" };
@@ -366,35 +380,36 @@
             }
         }
 
+        // Função Principal de Otimização
         optimizeButton.addEventListener('click', async () => {
             const link = shopeeLinkInput.value.trim();
             messageArea.textContent = ''; messageArea.className = 'text-center my-4 p-3 rounded-lg text-sm';
             contentDisplayArea.classList.add('hidden'); clearAllDataFields();
 
+            // Validação do Link
             if (!link) { displayMessage('Por favor, insira um link da Shopee.', 'error'); return; }
-            try { new URL(link); if (!link.includes('shopee.com')) throw new Error(); }
+            try {
+                 const urlObject = new URL(link); // Tenta criar um objeto URL
+                 if (!urlObject.hostname.includes('shopee.com')) { // Verifica se o domínio é da Shopee
+                      throw new Error('Não é um link da Shopee.');
+                 }
+            }
             catch (_) { displayMessage('Link inválido ou não é da Shopee.', 'error'); return; }
 
+            // Feedback visual de carregamento
             loader.style.display = 'block'; optimizeButton.disabled = true;
             optimizeButton.textContent = 'Analisando...';
             optimizeButton.classList.add('opacity-70', 'cursor-not-allowed');
 
             // #####################################################################
-            // ## INÍCIO DA LÓGICA DE FETCH - Conforme Fase 5 do Passo a Passo  ##
+            // ## LÓGICA DE FETCH PARA O BACKEND                                  ##
             // #####################################################################
             try {
                 // =======================================================================================
-                // == IMPORTANTE: ATUALIZE ESTA URL PARA O SEU BACKEND NO RENDER.COM ==
+                // == IMPORTANTE: CONFIRME E ATUALIZE ESTA URL PARA O SEU BACKEND NO RENDER.COM ==
                 // =======================================================================================
-                // Exemplo para teste local (se o seu backend estiver rodando na porta 3001):
-                // const backendUrl = 'http://localhost:3001/api/analisar-produto';
-                //
-                // Exemplo para quando o backend estiver no Render:
-                const backendUrl = 'https://otimizador-shopee-api.onrender.com/api/analisar-produto';
-                //
-                // Certifique-se de que o nome do serviço e o endpoint (/api/analisar-produto) estão corretos.
+                const backendUrl = 'https://otimizador-shopee-api.onrender.com/api/analisar-produto'; // <- VERIFIQUE ESTA URL!
                 // =======================================================================================
-
 
                 console.log('Enviando link para o backend:', link);
                 const response = await fetch(backendUrl, {
@@ -405,82 +420,99 @@
                     body: JSON.stringify({ shopeeProductUrl: link }),
                 });
 
-                const resultado = await response.json();
+                const resultado = await response.json(); // Tenta parsear a resposta como JSON
 
+                // Verifica se a resposta HTTP foi bem-sucedida (status 2xx)
                 if (!response.ok) {
-                    console.error("Erro do backend:", resultado);
-                    displayMessage(resultado.mensagem || `Erro ${response.status} do servidor. Tente novamente.`, 'error');
-                    throw new Error(resultado.mensagem || `Erro ${response.status}`);
+                    console.error("Erro do backend (HTTP não OK):", resultado);
+                    // Usa a mensagem do JSON se disponível, senão o statusText da resposta
+                    displayMessage(resultado.mensagem || response.statusText || `Erro ${response.status} do servidor.`, 'error');
+                    // Lança um erro para ser pego pelo catch principal
+                    throw new Error(resultado.mensagem || `Erro HTTP ${response.status}`);
                 }
 
-
+                // Verifica o status da aplicação retornado no JSON
                 if (resultado.status === "sucesso") {
                     displayMessage(resultado.mensagem || 'Análise concluída!', 'success');
 
-                    originalPriceEl.textContent = resultado.dadosOriginais.precoOriginal || 'N/A';
-                    originalCategoryEl.textContent = resultado.dadosOriginais.categoriaOriginal || 'N/A';
-                    originalRatingEl.textContent = resultado.dadosOriginais.avaliacaoMediaOriginal || 'N/A';
-                    originalReviewsCountEl.textContent = resultado.dadosOriginais.quantidadeAvaliacoesOriginal || 'N/A';
-                    originalStoreNameEl.textContent = resultado.dadosOriginais.nomeLojaOriginal || 'N/A';
-                    originalVariationsEl.textContent = resultado.dadosOriginais.variacoesOriginais && resultado.dadosOriginais.variacoesOriginais.length > 0 ? resultado.dadosOriginais.variacoesOriginais.join(', ') : 'N/A';
-                    originalTitleTextarea.value = resultado.dadosOriginais.tituloOriginal || '';
-                    originalDescriptionTextarea.value = resultado.dadosOriginais.descricaoOriginal || '';
+                    // Preenche os dados recebidos do backend
+                    // Usando operador '||' para fallback caso o campo não exista na resposta
+                    originalPriceEl.textContent = resultado.dadosOriginais?.precoOriginal || 'N/A';
+                    originalCategoryEl.textContent = resultado.dadosOriginais?.categoriaOriginal || 'N/A';
+                    originalRatingEl.textContent = resultado.dadosOriginais?.avaliacaoMediaOriginal || 'N/A';
+                    originalReviewsCountEl.textContent = resultado.dadosOriginais?.quantidadeAvaliacoesOriginal || 'N/A';
+                    originalStoreNameEl.textContent = resultado.dadosOriginais?.nomeLojaOriginal || 'N/A';
+                    originalVariationsEl.textContent = resultado.dadosOriginais?.variacoesOriginais && resultado.dadosOriginais.variacoesOriginais.length > 0 ? resultado.dadosOriginais.variacoesOriginais.join(', ') : 'N/A';
+                    originalTitleTextarea.value = resultado.dadosOriginais?.tituloOriginal || '';
+                    originalDescriptionTextarea.value = resultado.dadosOriginais?.descricaoOriginal || '';
 
-                    optimizedTitleTextarea.value = resultado.dadosOtimizados.tituloOtimizado || '';
-                    optimizedDescriptionTextarea.value = resultado.dadosOtimizados.descricaoOtimizada || '';
+                    optimizedTitleTextarea.value = resultado.dadosOtimizados?.tituloOtimizado || '';
+                    optimizedDescriptionTextarea.value = resultado.dadosOtimizados?.descricaoOtimizada || '';
 
+                    // Atualiza contadores
                     updateCharCounter(originalTitleTextarea, originalTitleCounter);
                     updateCharCounter(originalDescriptionTextarea, originalDescriptionCounter);
                     updateCharCounter(optimizedTitleTextarea, optimizedTitleCounter);
                     updateCharCounter(optimizedDescriptionTextarea, optimizedDescriptionCounter);
 
-                    aiInsightsListEl.innerHTML = '';
-                    if (resultado.insightsDaIA && resultado.insightsDaIA.length > 0) {
+                    // Preenche insights da IA
+                    aiInsightsListEl.innerHTML = ''; // Limpa a lista
+                    if (resultado.insightsDaIA && Array.isArray(resultado.insightsDaIA) && resultado.insightsDaIA.length > 0) {
                         resultado.insightsDaIA.forEach(insight => {
-                            const styling = getInsightStyling(insight.type);
-                            const li = document.createElement('li');
-                            li.className = `insight-card ${styling.typeClass}`;
-                            
-                            const headerDiv = document.createElement('div');
-                            headerDiv.className = 'insight-header';
-                            headerDiv.innerHTML = styling.iconSVG + `<span class="insight-title">${insight.title || styling.defaultTitle}</span>`;
+                            // Verifica se 'insight' é um objeto antes de acessar propriedades
+                            if (typeof insight === 'object' && insight !== null) {
+                                const styling = getInsightStyling(insight.type); // Passa o tipo para estilização
+                                const li = document.createElement('li');
+                                li.className = `insight-card ${styling.typeClass}`;
 
-                            const descriptionDiv = document.createElement('div');
-                            descriptionDiv.className = 'insight-description';
-                            descriptionDiv.innerHTML = insight.description;
+                                const headerDiv = document.createElement('div');
+                                headerDiv.className = 'insight-header';
+                                headerDiv.innerHTML = styling.iconSVG + `<span class="insight-title">${insight.title || styling.defaultTitle}</span>`;
 
-                            li.appendChild(headerDiv);
-                            li.appendChild(descriptionDiv);
+                                const descriptionDiv = document.createElement('div');
+                                descriptionDiv.className = 'insight-description';
+                                descriptionDiv.innerHTML = insight.description || ''; // Usa innerHTML para permitir tags
 
-                            if (insight.shortTermAction || insight.estimatedImpact) {
-                                const detailsDiv = document.createElement('div');
-                                detailsDiv.className = 'insight-details';
-                                if (insight.shortTermAction) {
-                                    detailsDiv.innerHTML += `<p><strong>Ação Curto Prazo:</strong> ${insight.shortTermAction}</p>`;
+                                li.appendChild(headerDiv);
+                                li.appendChild(descriptionDiv);
+
+                                // Adiciona detalhes se existirem
+                                if (insight.shortTermAction || insight.estimatedImpact) {
+                                    const detailsDiv = document.createElement('div');
+                                    detailsDiv.className = 'insight-details';
+                                    if (insight.shortTermAction) {
+                                        detailsDiv.innerHTML += `<p><strong>Ação Curto Prazo:</strong> ${insight.shortTermAction}</p>`;
+                                    }
+                                    if (insight.estimatedImpact) {
+                                        detailsDiv.innerHTML += `<p><strong>Impacto Estimado:</strong> ${insight.estimatedImpact}</p>`;
+                                    }
+                                    li.appendChild(detailsDiv);
                                 }
-                                if (insight.estimatedImpact) {
-                                    detailsDiv.innerHTML += `<p><strong>Impacto Estimado:</strong> ${insight.estimatedImpact}</p>`;
-                                }
-                                li.appendChild(detailsDiv);
+                                aiInsightsListEl.appendChild(li);
+                            } else {
+                                 console.warn("Item inválido encontrado nos insights da IA:", insight);
                             }
-                            aiInsightsListEl.appendChild(li);
                         });
                     } else {
-                        aiInsightsListEl.innerHTML = '<li class="italic text-slate-500 insight-card">Nenhum insight adicional fornecido pela IA.</li>';
+                        // Nenhuma mensagem aqui, pois a lista vazia já indica isso visualmente
+                         aiInsightsListEl.innerHTML = '<li class="italic text-slate-500 insight-card">Nenhum insight adicional fornecido pela IA.</li>';
                     }
 
-                    contentDisplayArea.classList.remove('hidden');
+                    contentDisplayArea.classList.remove('hidden'); // Mostra a área de conteúdo
 
-                } else {
-                    displayMessage(resultado.mensagem || 'Erro ao processar a solicitação no backend.', 'error');
+                } else { // Se o status HTTP foi OK, mas a aplicação retornou erro no JSON
+                    displayMessage(resultado.mensagem || 'Ocorreu um erro no processamento do backend.', 'error');
                 }
 
             } catch (error) {
-                console.error("Erro ao chamar o backend:", error);
-                if (!messageArea.textContent.toLowerCase().includes('erro')) {
-                     displayMessage('Falha na comunicação com o servidor. Verifique sua conexão ou tente mais tarde.', 'error');
+                // Captura erros de rede (fetch falhou) ou erros lançados manualmente (ex: !response.ok)
+                console.error("Erro durante o fetch ou processamento da resposta:", error);
+                // Mostra mensagem de erro genérica se nenhuma mensagem específica foi definida antes
+                if (!messageArea.textContent || messageArea.textContent.toLowerCase().includes('analisando')) {
+                     displayMessage('Falha na comunicação com o servidor. Verifique sua conexão ou a URL do backend.', 'error');
                 }
             } finally {
+                // Garante que o loader seja escondido e o botão reabilitado
                 loader.style.display = 'none';
                 optimizeButton.disabled = false;
                 optimizeButton.textContent = 'Analisar e Otimizar';
@@ -491,6 +523,7 @@
             // #####################################################################
         });
 
+        // Função para exibir mensagens (mantida)
         function displayMessage(message, type) {
             messageArea.textContent = message;
             if (type === 'success') {
@@ -503,6 +536,7 @@
                  messageArea.className = 'text-center my-4 p-3 rounded-lg text-sm bg-slate-700 bg-opacity-50 text-slate-300 border border-slate-600';
             }
         }
+        // Inicializa a visualização padrão (mantida)
         switchView('optimize');
     </script>
 </body>
