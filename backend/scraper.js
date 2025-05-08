@@ -6,12 +6,11 @@ async function scrapeShopeeProduct(url) {
     try {
         console.log(`Iniciando scraping para: ${url}`);
         // Cabeçalho User-Agent para simular um navegador comum
-        const headers = { 
+        const headers = {
             'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36', // User agent mais recente
             'Accept-Language': 'pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7',
             'Accept-Encoding': 'gzip, deflate, br',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
-            // Pode ser necessário adicionar mais cabeçalhos se a Shopee for exigente (Referer, Cookie, etc.)
         };
 
         const { data: html } = await axios.get(url, { headers });
@@ -19,9 +18,9 @@ async function scrapeShopeeProduct(url) {
         console.log("Página carregada, iniciando extração...");
 
         // === IMPORTANTE: Seletores CSS precisam ser validados e ajustados ===
-        // A estrutura da Shopee muda. Use as Ferramentas do Desenvolvedor (F12) 
+        // A estrutura da Shopee muda. Use as Ferramentas do Desenvolvedor (F12)
         // no navegador para encontrar os seletores corretos ATUALMENTE.
-        
+
         // Título: Tenta meta tag 'og:title', depois o H1 principal (inspecionar classe exata)
         const tituloOriginal = $('meta[property="og:title"]').attr('content')?.trim() || $('h1[class*="product-title"]').first().text()?.trim() || $('div[class*="page-product__header__title"] > span').first().text()?.trim();
 
@@ -29,7 +28,7 @@ async function scrapeShopeeProduct(url) {
         const descricaoOriginal = $('meta[property="og:description"]').attr('content')?.trim() || $('div[class*="product-description"] p').text()?.trim() || $('div[class*="product-detail"] > div:last-child').text()?.trim(); // Pode precisar juntar múltiplos <p>
 
         // Preço: Estrutura complexa. Tentar encontrar o elemento principal do preço.
-        const precoOriginal = $('div[class*="_prD-'"] > div').first().text()?.trim() || $('div[class*="flex items-center"] > div[class*="text-orange"]')?.first().text()?.trim(); // Classes podem variar muito
+        const precoOriginal = $('div[class*="_prD-"]').first().text()?.trim() || $('div[class*="flex items-center"] > div[class*="text-orange"]')?.first().text()?.trim(); // Classes podem variar muito
 
         // Categoria: Geralmente nos breadcrumbs
         let categoriaOriginal = "";
