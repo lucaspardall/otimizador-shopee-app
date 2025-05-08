@@ -1,4 +1,4 @@
-// server.js - Versão Corrigida
+// server.js - Versão Corrigida com CORS Explícito
 
 // Importa os módulos necessários
 const express = require('express');
@@ -11,7 +11,13 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Middlewares Essenciais
-app.use(cors()); // Habilita o CORS para permitir que o frontend acesse esta API
+
+// Configuração explícita do CORS:
+// Substitua 'https://otimizador-shopee-app-1.onrender.com' pela URL exata do seu frontend no Render.
+app.use(cors({
+  origin: 'https://otimizador-shopee-app-1.onrender.com' // Permite SOMENTE o seu frontend hospedado no Render
+}));
+
 app.use(express.json()); // Habilita o servidor a entender corpos de requisição em JSON
 
 // Rota Principal (para verificar se a API está no ar)
@@ -38,6 +44,7 @@ app.post('/api/analisar-produto', async (req, res) => {
     try {
         // 3.1. Chama a função de scraping (definida em scraper.js)
         console.log("Iniciando scraping...");
+        // IMPORTANTE: A função scrapeShopeeProduct precisa ser implementada corretamente em scraper.js
         const dadosOriginais = await scrapeShopeeProduct(shopeeProductUrl);
         // Verifica se o scraping retornou dados válidos
         if (!dadosOriginais || Object.keys(dadosOriginais).length === 0) {
@@ -49,6 +56,7 @@ app.post('/api/analisar-produto', async (req, res) => {
 
         // 3.2. Chama a sua IA (função definida em aiService.js) com os dados extraídos
         console.log("Chamando a IA...");
+        // IMPORTANTE: A função callYourAI precisa ser implementada corretamente em aiService.js
         const resultadoIA = await callYourAI(dadosOriginais);
         console.log("IA retornou. Título otimizado:", resultadoIA.dadosOtimizados.tituloOtimizado); // Loga o título otimizado
 
