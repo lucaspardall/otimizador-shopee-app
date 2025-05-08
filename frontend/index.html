@@ -383,11 +383,18 @@
             // ## INÍCIO DA LÓGICA DE FETCH - Conforme Fase 5 do Passo a Passo  ##
             // #####################################################################
             try {
-                // IMPORTANTE: Substitua pela URL do seu backend no Render quando estiver hospedado
-                // Para testes locais, se o backend estiver rodando na porta 3001:
-                const backendUrl = 'http://localhost:3001/api/analisar-produto';
-                // Quando for para o Render, será algo como:
-                // const backendUrl = 'https://seu-servico-shopee.onrender.com/api/analisar-produto';
+                // =======================================================================================
+                // == IMPORTANTE: ATUALIZE ESTA URL PARA O SEU BACKEND NO RENDER.COM ==
+                // =======================================================================================
+                // Exemplo para teste local (se o seu backend estiver rodando na porta 3001):
+                // const backendUrl = 'http://localhost:3001/api/analisar-produto';
+                //
+                // Exemplo para quando o backend estiver no Render:
+                const backendUrl = 'https://SEU_NOME_DE_SERVICO_BACKEND.onrender.com/api/analisar-produto';
+                //
+                // Certifique-se de que o nome do serviço e o endpoint (/api/analisar-produto) estão corretos.
+                // =======================================================================================
+
 
                 console.log('Enviando link para o backend:', link);
                 const response = await fetch(backendUrl, {
@@ -400,7 +407,7 @@
 
                 const resultado = await response.json();
 
-                if (!response.ok) { // Verifica se a resposta HTTP não foi bem-sucedida (status 4xx ou 5xx)
+                if (!response.ok) {
                     console.error("Erro do backend:", resultado);
                     displayMessage(resultado.mensagem || `Erro ${response.status} do servidor. Tente novamente.`, 'error');
                     throw new Error(resultado.mensagem || `Erro ${response.status}`);
@@ -410,7 +417,6 @@
                 if (resultado.status === "sucesso") {
                     displayMessage(resultado.mensagem || 'Análise concluída!', 'success');
 
-                    // Preencher dados originais
                     originalPriceEl.textContent = resultado.dadosOriginais.precoOriginal || 'N/A';
                     originalCategoryEl.textContent = resultado.dadosOriginais.categoriaOriginal || 'N/A';
                     originalRatingEl.textContent = resultado.dadosOriginais.avaliacaoMediaOriginal || 'N/A';
@@ -420,17 +426,14 @@
                     originalTitleTextarea.value = resultado.dadosOriginais.tituloOriginal || '';
                     originalDescriptionTextarea.value = resultado.dadosOriginais.descricaoOriginal || '';
 
-                    // Preencher dados otimizados
                     optimizedTitleTextarea.value = resultado.dadosOtimizados.tituloOtimizado || '';
                     optimizedDescriptionTextarea.value = resultado.dadosOtimizados.descricaoOtimizada || '';
 
-                    // Atualizar contadores
                     updateCharCounter(originalTitleTextarea, originalTitleCounter);
                     updateCharCounter(originalDescriptionTextarea, originalDescriptionCounter);
                     updateCharCounter(optimizedTitleTextarea, optimizedTitleCounter);
                     updateCharCounter(optimizedDescriptionTextarea, optimizedDescriptionCounter);
 
-                    // Preencher insights da IA
                     aiInsightsListEl.innerHTML = '';
                     if (resultado.insightsDaIA && resultado.insightsDaIA.length > 0) {
                         resultado.insightsDaIA.forEach(insight => {
@@ -468,13 +471,12 @@
 
                     contentDisplayArea.classList.remove('hidden');
 
-                } else { // Se o status da aplicação for "erro" mas a resposta HTTP foi OK (menos comum)
+                } else {
                     displayMessage(resultado.mensagem || 'Erro ao processar a solicitação no backend.', 'error');
                 }
 
             } catch (error) {
                 console.error("Erro ao chamar o backend:", error);
-                // Não sobrescreve a mensagem de erro do backend se já foi mostrada
                 if (!messageArea.textContent.toLowerCase().includes('erro')) {
                      displayMessage('Falha na comunicação com o servidor. Verifique sua conexão ou tente mais tarde.', 'error');
                 }
