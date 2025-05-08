@@ -1,32 +1,26 @@
-// server.js - Versão com CORS Simplificado para Teste
+// server.js - Versão Ultra-Simplificada para Teste de Comunicação
 
 // Importa os módulos necessários
 const express = require('express');
 const cors = require('cors');
-// IMPORTANTE: Certifique-se que os arquivos scraper.js e aiService.js existem
-// e exportam as funções corretamente.
-// Se eles não existirem ou tiverem erros, o require vai falhar.
-let scrapeShopeeProduct, callYourAI;
-try {
-    // Verifica se o ficheiro existe antes de tentar o require (melhoria)
-    require.resolve('./scraper');
-    scrapeShopeeProduct = require('./scraper').scrapeShopeeProduct;
-    console.log("Módulo scraper.js carregado com sucesso."); // Log adicionado
-} catch (e) {
-    console.error("ERRO FATAL: Não foi possível carregar './scraper'. Verifique se o ficheiro existe e não tem erros de sintaxe.", e);
-    // Define uma função mock que sempre falha, para que o erro seja claro mais tarde
-    scrapeShopeeProduct = async () => { throw new Error("Falha ao carregar scraper.js"); };
-}
-try {
-    require.resolve('./aiService');
-    callYourAI = require('./aiService').callYourAI;
-    console.log("Módulo aiService.js carregado com sucesso."); // Log adicionado
-} catch (e) {
-    console.error("ERRO FATAL: Não foi possível carregar './aiService'. Verifique se o ficheiro existe e não tem erros de sintaxe.", e);
-    // Define uma função mock
-    callYourAI = async () => { throw new Error("Falha ao carregar aiService.js"); };
-}
-// --- Fim da importação ---
+
+// Não precisamos importar scraper e aiService nesta versão de teste,
+// mas mantemos a estrutura para facilitar a volta depois.
+// let scrapeShopeeProduct, callYourAI;
+// try {
+//     require.resolve('./scraper');
+//     scrapeShopeeProduct = require('./scraper').scrapeShopeeProduct;
+//     console.log("Módulo scraper.js carregado com sucesso.");
+// } catch (e) {
+//     console.error("ERRO FATAL: Não foi possível carregar './scraper'.", e);
+// }
+// try {
+//     require.resolve('./aiService');
+//     callYourAI = require('./aiService').callYourAI;
+//     console.log("Módulo aiService.js carregado com sucesso.");
+// } catch (e) {
+//     console.error("ERRO FATAL: Não foi possível carregar './aiService'.", e);
+// }
 
 
 const app = express();
@@ -34,102 +28,84 @@ const app = express();
 const PORT = process.env.PORT || 3001;
 
 // --- Middlewares Essenciais ---
-console.log("Configurando middlewares..."); // Log adicionado
-// 1. Habilita o servidor a entender corpos de requisição em JSON (IMPORTANTE: antes do CORS se ele precisar ler headers customizados, mas geralmente a ordem aqui não é crítica)
+console.log("Configurando middlewares...");
+// 1. Habilita o servidor a entender corpos de requisição em JSON
 app.use(express.json());
-
 // 2. Configuração do CORS Simplificada (Permite QUALQUER origem - APENAS PARA TESTE)
 console.log("ATENÇÃO: Configuração CORS permitindo qualquer origem (para teste).");
 app.use(cors());
-console.log("Middlewares configurados."); // Log adicionado
+console.log("Middlewares configurados.");
 
 
 // --- Rotas da API ---
 
 // Rota Principal (para verificar se a API está no ar)
 app.get('/', (req, res) => {
-    console.log("Recebido pedido GET em /"); // Log adicionado
-    // Envia uma mensagem simples indicando que a API está funcional
-    res.send('API do Otimizador Shopee está no ar!');
+    console.log("Recebido pedido GET em /");
+    res.send('API do Otimizador Shopee está no ar! (Versão de Teste Simplificada)'); // Mensagem atualizada
 });
 
-// Rota PRINCIPAL para analisar o produto Shopee
-// Não precisamos mais do app.options separado quando usamos cors() sem opções específicas.
+// =========================================================================
+// == Rota PRINCIPAL para analisar o produto Shopee - VERSÃO SIMPLIFICADA ==
+// =========================================================================
 app.post('/api/analisar-produto', async (req, res) => {
-    console.log("Recebido pedido POST em /api/analisar-produto"); // Log adicionado
-    // 1. Extrai a URL do produto do corpo da requisição enviada pelo frontend
+    console.log("Recebido pedido POST em /api/analisar-produto (versão ultra-simplificada)");
     const { shopeeProductUrl } = req.body;
 
-    // 2. Validação Inicial: Verifica se a URL foi realmente enviada
+    // Validação básica da URL recebida
     if (!shopeeProductUrl) {
-        console.log("ERRO: URL do produto não fornecida na requisição."); // Log de erro
-        // Retorna um erro 400 (Bad Request) se a URL estiver faltando
+        console.log("ERRO (simplificado): URL do produto não fornecida.");
         return res.status(400).json({ status: "erro", mensagem: "URL do produto não fornecida." });
     }
-
-    // Validação básica do formato da URL (opcional, mas recomendado)
     try {
-        new URL(shopeeProductUrl); // Tenta criar um objeto URL
-        console.log(`URL recebida e validada: ${shopeeProductUrl}`); // Log adicionado
-    } catch (e) {
-        console.log("ERRO: Formato de URL inválido:", shopeeProductUrl); // Log de erro
-        return res.status(400).json({ status: "erro", mensagem: "Formato de URL inválido." });
+        new URL(shopeeProductUrl); // Só para validar o formato
+        console.log(`URL recebida (simplificado): ${shopeeProductUrl}`);
+    } catch(e){
+         console.log("ERRO (simplificado): Formato de URL inválido.");
+         return res.status(400).json({ status: "erro", mensagem: "Formato de URL inválido." });
     }
 
 
-    // 3. Bloco try...catch para lidar com possíveis erros durante o processo
-    try {
-        // --- Bloco principal do processamento ---
-        console.log("[1/3] Iniciando scraping..."); // Log de etapa
-        const dadosOriginais = await scrapeShopeeProduct(shopeeProductUrl);
-        console.log("[1/3] Scraping tentou executar."); // Log de etapa
+    // ===== NÃO CHAMA SCRAPING NEM IA NESTA VERSÃO =====
 
-        // Verifica se o scraping retornou dados válidos (ajuste: verifica se é um objeto e tem chaves)
-        if (!dadosOriginais || typeof dadosOriginais !== 'object' || Object.keys(dadosOriginais).length === 0) {
-             console.log("ERRO: Scraping não retornou dados válidos ou retornou objeto vazio."); // Log de erro
-             // Considerar retornar 422 (Unprocessable Entity) ou 502 (Bad Gateway) se o scraping falhar
-             return res.status(500).json({ status: "erro", mensagem: "Não foi possível extrair dados do produto. Verifique o link ou tente novamente." });
-        }
-        console.log("[1/3] Scraping concluído com sucesso (Título: " + dadosOriginais.tituloOriginal + ")."); // Log de sucesso
+    // APENAS DEVOLVE UMA RESPOSTA DE SUCESSO MOCKADA IMEDIATAMENTE
+    const mockUltraSimplificado = {
+        status: "sucesso",
+        mensagem: "Comunicação com Backend OK (teste ultra-simplificado)!",
+        dadosOriginais: { // Dados mínimos para o frontend não quebrar
+            tituloOriginal: "Teste Backend OK",
+            descricaoOriginal: "Se você vê isto, a comunicação básica funcionou.",
+            precoOriginal: "R$ 0,00",
+            categoriaOriginal: "Teste",
+            avaliacaoMediaOriginal: "5 Estrelas",
+            quantidadeAvaliacoesOriginal: "1 Avaliação",
+            nomeLojaOriginal: "Loja Teste",
+            variacoesOriginais: ["Teste"]
+        },
+        dadosOtimizados: { // Dados mínimos
+            tituloOtimizado: "Teste Backend OK - Otimizado",
+            descricaoOtimizada: "A comunicação básica entre frontend e backend está funcionando!"
+        },
+        insightsDaIA: [{ // Insight mínimo
+            type: "tip",
+            title: "Teste de Comunicação",
+            description: "O painel conseguiu enviar o link e receber esta resposta do backend.",
+            shortTermAction: "Agora, restaure a lógica real no backend.",
+            estimatedImpact: "Desbloquear a funcionalidade completa."
+        }]
+    };
 
-        console.log("[2/3] Chamando a IA..."); // Log de etapa
-        const resultadoIA = await callYourAI(dadosOriginais);
-        console.log("[2/3] Chamada da IA tentou executar."); // Log de etapa
-
-         // Verifica se a IA retornou dados válidos
-        if (!resultadoIA || !resultadoIA.dadosOtimizados) {
-             console.log("ERRO: Chamada da IA não retornou dados otimizados válidos."); // Log de erro
-             return res.status(500).json({ status: "erro", mensagem: "A IA não retornou um resultado válido." });
-        }
-        console.log("[2/3] IA retornou com sucesso (Título Otimizado: " + resultadoIA.dadosOtimizados.tituloOtimizado + ")."); // Log de sucesso
-
-        // 3.3. Monta a resposta final para enviar de volta ao frontend
-        const respostaFinal = {
-            status: "sucesso",
-            mensagem: "Análise concluída com sucesso!",
-            dadosOriginais: dadosOriginais,
-            dadosOtimizados: resultadoIA.dadosOtimizados,
-            // Garante que insightsDaIA seja sempre um array
-            insightsDaIA: Array.isArray(resultadoIA.insightsDaIA) ? resultadoIA.insightsDaIA : []
-        };
-
-        // 3.4. Envia a resposta final em formato JSON para o frontend
-        console.log("[3/3] Enviando resposta final para o frontend."); // Log de etapa
-        res.json(respostaFinal);
-        // --- Fim do bloco principal ---
-
-    } catch (error) {
-        // 3.5. Captura qualquer erro que ocorra no try (seja no scraping ou na chamada da IA)
-        console.error("ERRO CRÍTICO dentro do try/catch de /api/analisar-produto:", error); // Log de erro crítico
-        // Envia uma resposta de erro genérica para o frontend
-        res.status(500).json({
-            status: "erro",
-            mensagem: error.message || "Erro interno grave no servidor."
-        });
-    }
+    console.log("Enviando resposta mockada ultra-simplificada...");
+    // Adiciona um pequeno delay para simular algum processamento (opcional)
+    await new Promise(resolve => setTimeout(resolve, 100)); // Pequeno delay
+    res.json(mockUltraSimplificado); // Envia a resposta fixa
 });
+// =========================================================================
+// == FIM DA ROTA SIMPLIFICADA                                            ==
+// =========================================================================
+
 
 // Inicia o servidor para escutar na porta definida
 app.listen(PORT, () => {
-    console.log(`Servidor backend iniciado e a escutar na porta ${PORT}`); // Log de inicialização
+    console.log(`Servidor backend iniciado e a escutar na porta ${PORT} (Versão de Teste Simplificada)`);
 });
