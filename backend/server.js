@@ -1,69 +1,83 @@
-const { callYourAI } = require('./aiService');
-const { scrapeShopeeProduct } = require('./scraper');
-// server.js
+// server.js - Versão Corrigida
+
+// Importa os módulos necessários
 const express = require('express');
 const cors = require('cors');
-// Funções de scraping e IA serão importadas ou definidas aqui depois
+const { scrapeShopeeProduct } = require('./scraper'); // Importa a função de scraping
+const { callYourAI } = require('./aiService'); // Importa a função para chamar sua IA
 
 const app = express();
-const PORT = process.env.PORT || 3001; // Porta para o servidor rodar
+// Define a porta. Usa a porta fornecida pelo ambiente (ex: Render) ou 3001 para testes locais.
+const PORT = process.env.PORT || 3001;
 
-// Middlewares
-app.use(cors()); // Habilita o CORS para todas as rotas
-app.use(express.json()); // Permite que o servidor entenda JSON vindo nas requisições
+// Middlewares Essenciais
+app.use(cors()); // Habilita o CORS para permitir que o frontend acesse esta API
+app.use(express.json()); // Habilita o servidor a entender corpos de requisição em JSON
 
-// Rota principal da API (exemplo)
+// Rota Principal (para verificar se a API está no ar)
 app.get('/', (req, res) => {
+    // Envia uma mensagem simples indicando que a API está funcional
     res.send('API do Otimizador Shopee está no ar!');
 });
 
-// Rota para analisar o produto (será implementada em detalhes)
+// Rota PRINCIPAL para analisar o produto Shopee
 app.post('/api/analisar-produto', async (req, res) => {
-    // Lógica virá aqui
-   const dadosOriginais = await scrapeShopeeProduct(shopeeProductUrl);
-if (!dadosOriginais || Object.keys(dadosOriginais).length === 0) {
-    return res.status(500).json({ status: "erro", mensagem: "Não foi possível extrair dados do produto." });
-}
-const resultadoIA = await callYourAI(dadosOriginais);
-const respostaFinal = {
-    status: "sucesso",
-    mensagem: "Análise concluída com sucesso!",
-    dadosOriginais: dadosOriginais, // Dados do scraping
-    dadosOtimizados: resultadoIA.dadosOtimizados, // Título/Descrição da IA
-    insightsDaIA: resultadoIA.insightsDaIA // Insights da IA
-};
-res.json(respostaFinal);
+    // 1. Extrai a URL do produto do corpo da requisição enviada pelo frontend
+    const { shopeeProductUrl } = req.body;
 
+    // 2. Validação Inicial: Verifica se a URL foi realmente enviada
     if (!shopeeProductUrl) {
+        console.log("Requisição recebida sem shopeeProductUrl");
+        // Retorna um erro 400 (Bad Request) se a URL estiver faltando
         return res.status(400).json({ status: "erro", mensagem: "URL do produto não fornecida." });
     }
 
+    console.log(`Recebida requisição para analisar: ${shopeeProductUrl}`);
+
+    // 3. Bloco try...catch para lidar com possíveis erros durante o processo
     try {
-        // 1. Chamar função de scraping
-        // const dadosOriginais = await scrapeShopeeProduct(shopeeProductUrl);
+        // 3.1. Chama a função de scraping (definida em scraper.js)
+        console.log("Iniciando scraping...");
+        const dadosOriginais = await scrapeShopeeProduct(shopeeProductUrl);
+        // Verifica se o scraping retornou dados válidos
+        if (!dadosOriginais || Object.keys(dadosOriginais).length === 0) {
+             console.log("Scraping não retornou dados válidos.");
+             // Retorna um erro 500 (Internal Server Error) ou talvez 404 (Not Found) se não extraiu nada
+             return res.status(500).json({ status: "erro", mensagem: "Não foi possível extrair dados do produto da URL fornecida." });
+        }
+        console.log("Scraping concluído. Dados extraídos:", dadosOriginais.tituloOriginal); // Loga apenas o título para não poluir muito
 
-        // 2. Chamar sua IA com os dadosOriginais
-        // const resultadoIA = await callYourAI(dadosOriginais);
+        // 3.2. Chama a sua IA (função definida em aiService.js) com os dados extraídos
+        console.log("Chamando a IA...");
+        const resultadoIA = await callYourAI(dadosOriginais);
+        console.log("IA retornou. Título otimizado:", resultadoIA.dadosOtimizados.tituloOtimizado); // Loga o título otimizado
 
-        // 3. Montar a resposta final
-        // const respostaFinal = { ...dadosOriginais, ...resultadoIA };
-
-        // Por enquanto, uma resposta mockada:
-        const mockResponse = {
+        // 3.3. Monta a resposta final para enviar de volta ao frontend
+        const respostaFinal = {
             status: "sucesso",
-            mensagem: "Análise mockada concluída.",
-            dadosOriginais: { precoOriginal: "R$ 99,90", tituloOriginal: "Produto Mockado" },
-            dadosOtimizados: { tituloOtimizado: "Título Mockado Otimizado pela IA" },
-            insightsDaIA: [{ type: "tip", title: "Dica Mockada", description: "Este é um insight mockado.", shortTermAction: "Ação mockada", estimatedImpact: "Impacto mockado" }]
+            mensagem: "Análise concluída com sucesso!",
+            dadosOriginais: dadosOriginais, // Inclui os dados originais extraídos
+            dadosOtimizados: resultadoIA.dadosOtimizados, // Inclui título/descrição otimizados pela IA
+            insightsDaIA: resultadoIA.insightsDaIA // Inclui os insights estratégicos da IA
         };
-        res.json(mockResponse);
+
+        // 3.4. Envia a resposta final em formato JSON para o frontend
+        console.log("Enviando resposta final para o frontend.");
+        res.json(respostaFinal);
 
     } catch (error) {
-        console.error("Erro no endpoint /api/analisar-produto:", error);
-        res.status(500).json({ status: "erro", mensagem: "Erro interno no servidor ao processar a solicitação." });
+        // 3.5. Captura qualquer erro que ocorra no try (seja no scraping ou na chamada da IA)
+        console.error("Erro detalhado no endpoint /api/analisar-produto:", error); // Loga o erro completo no console do servidor
+        // Envia uma resposta de erro genérica para o frontend
+        res.status(500).json({
+            status: "erro",
+            // Envia a mensagem de erro específica se disponível, senão uma genérica
+            mensagem: error.message || "Erro interno no servidor ao processar a solicitação."
+        });
     }
 });
 
+// Inicia o servidor para escutar na porta definida
 app.listen(PORT, () => {
     console.log(`Servidor backend rodando na porta ${PORT}`);
 });
