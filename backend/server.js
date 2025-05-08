@@ -1,4 +1,4 @@
-// server.js - Versão Corrigida com CORS Explícito
+// server.js - Versão com CORS Simplificado para Teste
 
 // Importa os módulos necessários
 const express = require('express');
@@ -29,18 +29,13 @@ const PORT = process.env.PORT || 3001;
 
 // --- Middlewares Essenciais ---
 
-// 1. Configuração explícita do CORS:
-// VERIFIQUE SE ESTA URL ESTÁ EXATAMENTE CORRETA!
-const corsOptions = {
-  origin: 'https://otimizador-shopee-app-1.onrender.com', // Permite SOMENTE o seu frontend hospedado no Render
-  methods: "GET,HEAD,PUT,PATCH,POST,DELETE", // Métodos permitidos
-  preflightContinue: false,
-  optionsSuccessStatus: 204 // Alguns navegadores legados (IE11, vários SmartTVs) engasgam com 204
-};
-app.use(cors(corsOptions));
-
-// 2. Habilita o servidor a entender corpos de requisição em JSON
+// 1. Habilita o servidor a entender corpos de requisição em JSON (IMPORTANTE: antes do CORS se ele precisar ler headers customizados, mas geralmente a ordem aqui não é crítica)
 app.use(express.json());
+
+// 2. Configuração do CORS Simplificada (Permite QUALQUER origem - APENAS PARA TESTE)
+console.log("ATENÇÃO: Configuração CORS permitindo qualquer origem (para teste).");
+app.use(cors());
+
 
 // --- Rotas da API ---
 
@@ -50,10 +45,8 @@ app.get('/', (req, res) => {
     res.send('API do Otimizador Shopee está no ar!');
 });
 
-// Rota para lidar com a requisição preflight OPTIONS para CORS
-app.options('/api/analisar-produto', cors(corsOptions)); // Habilita preflight para a rota específica
-
 // Rota PRINCIPAL para analisar o produto Shopee
+// Não precisamos mais do app.options separado quando usamos cors() sem opções específicas.
 app.post('/api/analisar-produto', async (req, res) => {
     // 1. Extrai a URL do produto do corpo da requisição enviada pelo frontend
     const { shopeeProductUrl } = req.body;
