@@ -1,6 +1,5 @@
-// scraper.js - Versão compatível com Render usando chrome-aws-lambda
-const chromium = require('chrome-aws-lambda');
-const puppeteer = require('puppeteer-core');
+// scraper.js - Versão atualizada usando Puppeteer padrão
+const puppeteer = require('puppeteer');
 
 // Função auxiliar para rolar a página e carregar conteúdo dinâmico
 async function autoScroll(page) {
@@ -31,28 +30,28 @@ async function autoScroll(page) {
 
 async function scrapeShopeeProduct(url) {
     let browser = null;
-    console.log(`[Scraper chrome-aws-lambda] Iniciando para: ${url}`);
+    console.log(`[Scraper Puppeteer] Iniciando para: ${url}`);
     try {
-        console.log(`[Scraper chrome-aws-lambda] Configurando browser...`);
-        
-        // chrome-aws-lambda gerencia o executável do Chrome e suas configurações
-        const executablePath = await chromium.executablePath;
-        console.log(`[Scraper chrome-aws-lambda] Caminho do executável: ${executablePath}`);
+        console.log(`[Scraper Puppeteer] Configurando browser...`);
         
         const launchOptions = {
-            executablePath,
-            headless: chromium.headless,
-            args: chromium.args,
-            defaultViewport: chromium.defaultViewport,
-            ignoreHTTPSErrors: true,
+            headless: 'new',
+            args: [
+                '--no-sandbox',
+                '--disable-setuid-sandbox',
+                '--disable-dev-shm-usage',
+                '--disable-accelerated-2d-canvas',
+                '--disable-gpu',
+                '--window-size=1920,1080'
+            ]
         };
         
-        console.log(`[Scraper chrome-aws-lambda] Lançando com opções: ${JSON.stringify(launchOptions, null, 2)}`);
+        console.log(`[Scraper Puppeteer] Lançando com opções: ${JSON.stringify(launchOptions, null, 2)}`);
         browser = await puppeteer.launch(launchOptions);
-        console.log(`[Scraper chrome-aws-lambda] Browser iniciado com sucesso!`);
+        console.log(`[Scraper Puppeteer] Browser iniciado com sucesso!`);
 
         const page = await browser.newPage();
-        console.log(`[Scraper chrome-aws-lambda] Nova página criada.`);
+        console.log(`[Scraper Puppeteer] Nova página criada.`);
 
         await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36');
         await page.setViewport({ width: 1366, height: 768 });
@@ -81,19 +80,19 @@ async function scrapeShopeeProduct(url) {
 
         page.setDefaultNavigationTimeout(90000);
 
-        console.log(`[Scraper chrome-aws-lambda] Navegando para ${url}...`);
+        console.log(`[Scraper Puppeteer] Navegando para ${url}...`);
         await page.goto(url, {
             waitUntil: 'networkidle0',
             timeout: 60000
         });
-        console.log('[Scraper chrome-aws-lambda] Página principal carregada.');
+        console.log('[Scraper Puppeteer] Página principal carregada.');
 
-        console.log('[Scraper chrome-aws-lambda] Rolando a página...');
+        console.log('[Scraper Puppeteer] Rolando a página...');
         await autoScroll(page);
-        console.log('[Scraper chrome-aws-lambda] Rolagem concluída. Aguardando...');
+        console.log('[Scraper Puppeteer] Rolagem concluída. Aguardando...');
         await new Promise(resolve => setTimeout(resolve, 5000));
 
-        console.log('[Scraper chrome-aws-lambda] Extraindo dados...');
+        console.log('[Scraper Puppeteer] Extraindo dados...');
         const dadosExtraidos = await page.evaluate(() => {
             // Função auxiliar para tentar diferentes seletores e obter texto
             const getText = (selectors, attribute = null) => {
@@ -172,13 +171,13 @@ async function scrapeShopeeProduct(url) {
             };
         });
 
-        console.log(`[Scraper chrome-aws-lambda] Dados extraídos com sucesso. Título: ${dadosExtraidos.tituloOriginal}`);
+        console.log(`[Scraper Puppeteer] Dados extraídos com sucesso. Título: ${dadosExtraidos.tituloOriginal}`);
         return dadosExtraidos;
 
     } catch (error) {
-        console.error(`[Scraper chrome-aws-lambda] ERRO durante o scraping: ${error.message}, Stack: ${error.stack}`);
+        console.error(`[Scraper Puppeteer] ERRO durante o scraping: ${error.message}, Stack: ${error.stack}`);
         return {
-            tituloOriginal: "Erro no Scraper (chrome-aws-lambda)",
+            tituloOriginal: "Erro no Scraper (Puppeteer)",
             descricaoOriginal: `Falha ao extrair dados: ${error.message}`,
             precoOriginal: "Erro",
             categoriaOriginal: "Erro",
@@ -189,9 +188,9 @@ async function scrapeShopeeProduct(url) {
         };
     } finally {
         if (browser) {
-            console.log(`[Scraper chrome-aws-lambda] Fechando browser...`);
+            console.log(`[Scraper Puppeteer] Fechando browser...`);
             await browser.close();
-            console.log(`[Scraper chrome-aws-lambda] Browser fechado.`);
+            console.log(`[Scraper Puppeteer] Browser fechado.`);
         }
     }
 }
