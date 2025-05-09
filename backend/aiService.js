@@ -6,7 +6,7 @@ const axios = require('axios');
 // == URL do Webhook do N8n (Use a URL de PRODUÇÃO na versão final) ==
 // ==================================================================
 // Usando a URL de teste fornecida por você. Troque pela URL de produção depois.
-const URL_N8N_WEBHOOK = 'https://lucaspardal.app.n8n.cloud/webhook-test/da2b7cb7-418d-490f-8076-b5be40e31b7b';
+const URL_N8N_WEBHOOK = 'https://lucaspardal.app.n8n.cloud/webhook/da2b7cb7-418d-490f-8076-b5be40e31b7b';
 // ==================================================================
 
 // Se precisar de alguma autenticação para o seu webhook N8n (menos comum para webhooks simples)
