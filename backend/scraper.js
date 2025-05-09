@@ -1,21 +1,16 @@
 // scraper.js - Versão com Puppeteer para renderizar JavaScript
 const puppeteer = require('puppeteer');
+let CHROME_PATH = '';
 
-// Diagnóstico do Chrome - Adicionado para verificar instalação
+// Tenta importar o caminho do Chrome que foi gerado durante o build
 try {
-    console.log('[Diagnóstico Chrome] Iniciando verificação do Chrome...');
-    const browserFetcher = puppeteer.createBrowserFetcher();
-    console.log('[Diagnóstico Chrome] Diretório do cache:', browserFetcher.cachePath);
-    console.log('[Diagnóstico Chrome] PUPPETEER_EXECUTABLE_PATH:', process.env.PUPPETEER_EXECUTABLE_PATH || 'não definido');
-    
-    // Tenta listar as versões do Chrome disponíveis
-    browserFetcher.localRevisions().then(revisions => {
-        console.log('[Diagnóstico Chrome] Revisões locais disponíveis:', revisions);
-    }).catch(e => {
-        console.error('[Diagnóstico Chrome] Erro ao listar revisões:', e.message);
-    });
+    const chromePath = require('./chrome-path');
+    CHROME_PATH = chromePath.CHROME_PATH;
+    console.log(`[Scraper Puppeteer] Caminho do Chrome carregado: ${CHROME_PATH}`);
 } catch (e) {
-    console.error('[Diagnóstico Chrome] Erro ao verificar Chrome:', e.message);
+    console.log('[Scraper Puppeteer] Arquivo de caminho do Chrome não encontrado, usando padrão');
+    // Caminho padrão do Chrome instalado pelo Puppeteer no Render
+    CHROME_PATH = '/opt/render/.cache/puppeteer/chrome/linux-127.0.6533.88/chrome-linux64/chrome';
 }
 
 // Função auxiliar para rolar a página e carregar conteúdo dinâmico
@@ -55,26 +50,23 @@ async function scrapeShopeeProduct(url) {
         
         // Opções para o Render.com e ambientes com recursos limitados
         const launchOptions = {
-            headless: true, // 'new' para o novo modo headless, true para o antigo. true é mais compatível.
+            headless: true,
+            executablePath: CHROME_PATH, // Usa o caminho específico do Chrome
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
-                '--disable-dev-shm-usage', // Importante para ambientes como Docker/Render
+                '--disable-dev-shm-usage',
                 '--disable-accelerated-2d-canvas',
-                '--disable-gpu', // Útil em ambientes sem GPU
-                '--window-size=1366,768', // Define um tamanho de janela
-                '--single-process', // Pode ajudar em ambientes com pouca memória
-                '--no-zygote' // Pode ajudar em ambientes com pouca memória
+                '--disable-gpu',
+                '--window-size=1366,768',
+                '--single-process',
+                '--no-zygote'
             ]
         };
         
-        // Usa o caminho do executável do Chrome se fornecido pelo ambiente
-        if (process.env.PUPPETEER_EXECUTABLE_PATH) {
-            console.log(`[Scraper Puppeteer] Usando PUPPETEER_EXECUTABLE_PATH: ${process.env.PUPPETEER_EXECUTABLE_PATH}`);
-            launchOptions.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
-        }
-
+        console.log(`[Scraper Puppeteer] Usando caminho do Chrome: ${launchOptions.executablePath}`);
         console.log("[Scraper Puppeteer] Iniciando browser com opções:", JSON.stringify(launchOptions, null, 2));
+        
         browser = await puppeteer.launch(launchOptions);
         console.log(`[Scraper Puppeteer] Browser iniciado.`);
 
