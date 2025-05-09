@@ -214,7 +214,7 @@
             optimizeButton.textContent = 'Analisando...';
             optimizeButton.classList.add('opacity-70');
 
-            let response; // Define response fora do try para acesso no catch
+            let response; 
             try {
                 // =======================================================================================
                 // == PONTO CRÍTICO: VERIFIQUE E CORRIJA ESTA URL ABAIXO! ==
@@ -225,7 +225,7 @@
                 console.log('Enviando link para o backend:', link); 
                 console.log('Chamando URL:', backendUrl); 
 
-                response = await fetch(backendUrl, { // Atribui a response à variável externa
+                response = await fetch(backendUrl, { 
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', },
                     body: JSON.stringify({ shopeeProductUrl: link }),
@@ -249,21 +249,16 @@
                 } else {
                     const textResponse = await response.text();
                     console.error("Resposta do backend não é JSON. Conteúdo:", textResponse); 
-                    // Mesmo se não for JSON, se o status não for OK, mostre o texto como erro
                     if (!response.ok) {
                          displayMessage(textResponse || `Erro ${response.status} do servidor (resposta não JSON).`, 'error');
                     } else {
-                         // Se o status for OK mas não for JSON, é um erro inesperado do backend
                          displayMessage(`Erro inesperado: O servidor retornou uma resposta não JSON (Status: ${response.status}).`, 'error');
                     }
-                    // Lança um erro para cair no catch principal
                     throw new Error(`Resposta não JSON (Status: ${response.status})`); 
                 }
 
-
                 if (!response.ok) {
-                    // O erro já foi tratado acima se não for JSON, mas se for JSON com erro:
-                    console.error("Erro do backend (HTTP não OK, mas JSON recebido):", resultado);
+                    console.error("Erro do backend (HTTP não OK após parse):", resultado);
                     displayMessage(resultado?.mensagem || response.statusText || `Erro ${response.status} do servidor.`, 'error');
                     throw new Error(resultado?.mensagem || `Erro HTTP ${response.status}`);
                 }
@@ -293,19 +288,20 @@
 
                     // Preenche insights da IA
                     aiInsightsListEl.innerHTML = ''; 
-                    console.log("Insights da IA recebidos:", resultado.insightsDaIA); 
+                    console.log("Insights da IA recebidos:", resultado.insightsDaIA); // LOG ADICIONADO
                     if (resultado.insightsDaIA && Array.isArray(resultado.insightsDaIA) && resultado.insightsDaIA.length > 0) {
                         resultado.insightsDaIA.forEach((insight, index) => { 
-                             console.log(`Processando insight ${index}:`, insight); 
+                             console.log(`Processando insight ${index}:`, insight); // LOG ADICIONADO
+                             // Verifica se 'insight' é um objeto e tem a propriedade 'type'
                              if (typeof insight === 'object' && insight !== null && typeof insight.type !== 'undefined') {
                                 const styling = getInsightStyling(insight.type); 
                                 const li = document.createElement('li');
                                 // Verifica se styling foi encontrado antes de acessar typeClass
-                                if (styling && styling.typeClass) {
+                                if (styling && styling.typeClass) { // <<<<<<<<<<<<<<<<<<<<<<< ESTA É A VERIFICAÇÃO IMPORTANTE
                                      li.className = `insight-card ${styling.typeClass}`; 
                                 } else {
                                      li.className = 'insight-card insight-suggestion'; // Classe padrão
-                                     console.warn(`Estilo não encontrado para o tipo de insight: ${insight.type}`);
+                                     console.warn(`Estilo não encontrado para o tipo de insight: ${insight.type}. Usando estilo padrão.`); // LOG ADICIONADO
                                 }
                                 
                                 const headerDiv = document.createElement('div');
@@ -332,7 +328,7 @@
                                  console.warn(`Item inválido ou sem 'type' encontrado nos insights da IA (índice ${index}):`, insight); 
                                  const errorLi = document.createElement('li');
                                  errorLi.className = 'insight-card insight-attention'; 
-                                 errorLi.innerHTML = `<div>${icons.attention} <span class="insight-title">Erro no Insight</span></div><div class="insight-description">Um dos insights recebidos está malformado.</div>`;
+                                 errorLi.innerHTML = `<div>${icons.attention} <span class="insight-title">Erro no Insight</span></div><div class="insight-description">Um dos insights recebidos está malformado. Verifique o console.</div>`;
                                  aiInsightsListEl.appendChild(errorLi);
                             }
                         });
@@ -342,13 +338,12 @@
 
                     contentDisplayArea.classList.remove('hidden'); 
 
-                } else { // Se o status HTTP foi OK, mas a aplicação retornou erro no JSON
+                } else { 
                     displayMessage(resultado?.mensagem || 'Ocorreu um erro no processamento do backend.', 'error');
                 }
 
             } catch (error) {
                 console.error("Erro durante o fetch ou processamento da resposta (bloco catch principal):", error);
-                // Mostra a mensagem de erro capturada, ou uma genérica se não houver mensagem
                 displayMessage(error.message || 'Falha crítica na comunicação. Verifique o console.', 'error');
             } finally {
                 loader.style.display = 'none';
@@ -359,13 +354,7 @@
         });
 
         // Função para exibir mensagens
-        function displayMessage(message, type) {
-             messageArea.textContent = message;
-             if (type === 'success') { messageArea.className = 'text-center my-4 p-3 rounded-lg text-sm bg-green-700 bg-opacity-30 text-green-300 border border-green-500'; }
-             else if (type === 'error') { messageArea.className = 'text-center my-4 p-3 rounded-lg text-sm bg-red-700 bg-opacity-30 text-red-300 border border-red-500'; }
-             else if (type === 'info') { messageArea.className = 'text-center my-4 p-3 rounded-lg text-sm bg-blue-700 bg-opacity-30 text-blue-300 border border-blue-500'; }
-             else { messageArea.className = 'text-center my-4 p-3 rounded-lg text-sm bg-slate-700 bg-opacity-50 text-slate-300 border border-slate-600'; }
-        }
+        function displayMessage(message, type) { /* ... */ }
         // Inicializa a visualização padrão
         switchView('optimize');
     </script>
