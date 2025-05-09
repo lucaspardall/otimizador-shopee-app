@@ -5,15 +5,14 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "build": "echo 'Build sem instalação explícita de Chrome (usando chrome-aws-lambda)'",
+    "build": "npm install",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
     "axios": "^1.7.2",
-    "chrome-aws-lambda": "^10.1.0",
     "cors": "^2.8.5",
     "express": "^4.19.2",
-    "puppeteer-core": "^10.1.0"
+    "puppeteer": "^24.8.2"
   },
   "keywords": [
     "shopee",
