@@ -1,13 +1,12 @@
-// scraper.js
+// scraper.js - AJUSTAR SELETORES CSS
 const axios = require('axios');
 const cheerio = require('cheerio');
 
 async function scrapeShopeeProduct(url) {
     try {
-        console.log(`Iniciando scraping para: ${url}`);
-        // Cabeçalho User-Agent para simular um navegador comum
+        console.log(`[Scraper] Iniciando scraping para: ${url}`);
         const headers = {
-            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36', // User agent mais recente
+            'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.36',
             'Accept-Language': 'pt-BR,pt;q=0.9,en-US;q=0.8,en;q=0.7',
             'Accept-Encoding': 'gzip, deflate, br',
             'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9'
@@ -15,59 +14,65 @@ async function scrapeShopeeProduct(url) {
 
         const { data: html } = await axios.get(url, { headers });
         const $ = cheerio.load(html);
-        console.log("Página carregada, iniciando extração...");
+        console.log("[Scraper] Página carregada, iniciando extração...");
 
-        // === IMPORTANTE: Seletores CSS precisam ser validados e ajustados ===
-        // A estrutura da Shopee muda. Use as Ferramentas do Desenvolvedor (F12)
-        // no navegador para encontrar os seletores corretos ATUALMENTE.
+        // =====================================================================
+        // == PONTO CRÍTICO: AJUSTAR OS SELETORES CSS ABAIXO ==
+        // == Use as Ferramentas do Desenvolvedor (F12) na página da Shopee ==
+        // == para encontrar os seletores corretos para CADA campo.        ==
+        // =====================================================================
 
-        // Título: Tenta meta tag 'og:title', depois o H1 principal (inspecionar classe exata)
-        const tituloOriginal = $('meta[property="og:title"]').attr('content')?.trim() || $('h1[class*="product-title"]').first().text()?.trim() || $('div[class*="page-product__header__title"] > span').first().text()?.trim();
+        // --- Título ---
+        // Procure a tag (h1, div, span?) e classe(s) do título principal
+        const tituloOriginal = $('SELETOR_CSS_DO_TITULO_AQUI').first().text()?.trim() 
+                            || $('meta[property="og:title"]').attr('content')?.trim(); // Fallback para meta tag
 
-        // Descrição: Tenta meta tag 'og:description', depois divs comuns para descrição
-        const descricaoOriginal = $('meta[property="og:description"]').attr('content')?.trim() || $('div[class*="product-description"] p').text()?.trim() || $('div[class*="product-detail"] > div:last-child').text()?.trim(); // Pode precisar juntar múltiplos <p>
+        // --- Descrição ---
+        // Procure a div ou parágrafos que contêm a descrição completa
+        const descricaoOriginal = $('SELETOR_CSS_DA_DESCRICAO_AQUI').text()?.trim()
+                               || $('meta[property="og:description"]').attr('content')?.trim(); // Fallback
 
-        // Preço: Estrutura complexa. Tentar encontrar o elemento principal do preço.
-        const precoOriginal = $('div[class*="_prD-"]').first().text()?.trim() || $('div[class*="flex items-center"] > div[class*="text-orange"]')?.first().text()?.trim(); // Classes podem variar muito
+        // --- Preço ---
+        // Encontrar o elemento que mostra o preço (pode ter variações)
+        const precoOriginal = $('SELETOR_CSS_DO_PRECO_AQUI').first().text()?.trim();
 
-        // Categoria: Geralmente nos breadcrumbs
+        // --- Categoria ---
+        // Geralmente nos breadcrumbs (ex: div.breadcrumb > a)
         let categoriaOriginal = "";
-        $('div[class*="breadcrumb"] a, div[class*="breadcrumb"] span').each((i, el) => { // Pega links e spans
+        $('SELETOR_CSS_DOS_BREADCRUMBS_AQUI').each((i, el) => {
             const text = $(el).text()?.trim();
-            if (text && text.toLowerCase() !== 'shopee') { // Ignora o link inicial "Shopee"
+            if (text && text.toLowerCase() !== 'shopee') {
                  categoriaOriginal += (categoriaOriginal ? " > " : "") + text;
             }
         });
 
-        // Avaliação Média: Procurar elemento com a pontuação
-        const avaliacaoMediaOriginalText = $('div[class*="shopee-product-rating"] div[class*="rating-score"]').first().text()?.trim();
+        // --- Avaliação Média ---
+        // Encontrar o elemento com a pontuação (ex: 4.8)
+        const avaliacaoMediaOriginalText = $('SELETOR_CSS_DA_PONTUACAO_AQUI').first().text()?.trim();
         const avaliacaoMediaOriginal = avaliacaoMediaOriginalText ? `${avaliacaoMediaOriginalText} Estrelas` : "Não encontrada";
 
-        // Quantidade de Avaliações: Procurar elemento com o número total
-        const quantidadeAvaliacoesOriginalText = $('div[class*="shopee-product-rating"] div[class*="rating-count"]').first().text()?.trim() || $('div:contains("avaliaç")').last().text()?.trim(); // Tenta encontrar texto com "avaliaç"
+        // --- Quantidade de Avaliações ---
+        // Encontrar o elemento com o número total de avaliações
+        const quantidadeAvaliacoesOriginalText = $('SELETOR_CSS_DA_QTD_AVALIACOES_AQUI').first().text()?.trim();
         const quantidadeAvaliacoesOriginal = quantidadeAvaliacoesOriginalText ? `${quantidadeAvaliacoesOriginalText} Avaliações` : "Não encontrada";
 
-        // Nome da Loja: Procurar link ou div com nome da loja
-        const nomeLojaOriginal = $('a[class*="shop-name"]').text()?.trim() || $('div[class*="shop-name"]').text()?.trim() || $('div[class*="section-seller-info__shop-name"] a').text()?.trim();
+        // --- Nome da Loja ---
+        // Encontrar o link ou div com o nome da loja
+        const nomeLojaOriginal = $('SELETOR_CSS_DO_NOME_DA_LOJA_AQUI').text()?.trim();
 
-        // Variações: Mapear botões ou elementos de variação
+        // --- Variações ---
+        // Encontrar os botões ou spans das variações
         const variacoesOriginais = [];
-        $('button[class*="product-variation"]').each((i, el) => {
+        $('SELETOR_CSS_DAS_VARIACOES_AQUI').each((i, el) => {
             const text = $(el).text()?.trim();
             if (text) variacoesOriginais.push(text);
         });
-         if (variacoesOriginais.length === 0) {
-             $('div[class*="product-variation-group"] span[class*="product-variation__name"]').each((i,el) => {
-                 const text = $(el).text()?.trim();
-                 if (text) variacoesOriginais.push(text);
-             });
-         }
         // =====================================================================
 
-        console.log("Extração concluída (verificar precisão dos dados).");
+        console.log("[Scraper] Extração concluída (verificar precisão dos dados).");
 
-        // Retorna um objeto com os dados encontrados (ou um valor padrão)
-        return {
+        // Retorna um objeto com os dados encontrados
+        const dadosExtraidos = {
             tituloOriginal: tituloOriginal || "Título não encontrado",
             descricaoOriginal: descricaoOriginal || "Descrição não encontrada",
             precoOriginal: precoOriginal || "Preço não encontrado",
@@ -76,20 +81,34 @@ async function scrapeShopeeProduct(url) {
             quantidadeAvaliacoesOriginal: quantidadeAvaliacoesOriginal,
             nomeLojaOriginal: nomeLojaOriginal || "Loja não encontrada",
             variacoesOriginais: variacoesOriginais.length > 0 ? variacoesOriginais : ["Variações não encontradas"]
-            // Adicionar mais campos aqui conforme necessário (ex: URLs de imagens, especificações)
+            // Adicionar mais campos se necessário
         };
 
-    } catch (error) {
-        console.error(`Erro durante o scraping de ${url}:`, error.message);
-        // Lança o erro para ser tratado no server.js
-        // Adiciona mais contexto ao erro
-        if (error.response) {
-            console.error("Status do erro HTTP:", error.response.status);
-            console.error("Headers do erro HTTP:", error.response.headers);
+        // Log para verificar os dados extraídos (antes de retornar)
+        console.log("[Scraper] Dados extraídos:", JSON.stringify(dadosExtraidos, null, 2));
+
+        // Verifica se pelo menos o título ou descrição foram encontrados
+        if (dadosExtraidos.tituloOriginal === "Título não encontrado" && dadosExtraidos.descricaoOriginal === "Descrição não encontrada") {
+             console.warn("[Scraper] Não foi possível extrair título nem descrição. Provavelmente os seletores estão incorretos ou a página mudou.");
+             // Pode optar por lançar um erro aqui se título/descrição forem essenciais
+             // throw new Error("Não foi possível extrair informações essenciais do produto.");
         }
-        throw new Error(`Falha ao fazer scraping da URL (${error.message}). Verifique se o link está correto e acessível.`);
+
+
+        return dadosExtraidos;
+
+    } catch (error) {
+        console.error(`[Scraper] Erro durante o scraping de ${url}:`, error.message);
+        if (error.response) {
+            console.error("[Scraper] Status do erro HTTP:", error.response.status);
+            // Se for erro 4xx ou 5xx da Shopee, pode indicar bloqueio ou página não encontrada
+            if (error.response.status >= 400) {
+                 throw new Error(`Falha ao acessar a página do produto (Status ${error.response.status}). Verifique o link ou a Shopee pode ter bloqueado o acesso.`);
+            }
+        }
+        // Lança um erro genérico para ser tratado no server.js
+        throw new Error(`Falha ao fazer scraping da URL: ${error.message}`);
     }
 }
 
-// Exporta a função para ser usada no server.js
 module.exports = { scrapeShopeeProduct };
