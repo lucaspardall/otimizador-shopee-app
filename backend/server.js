@@ -51,6 +51,59 @@ app.get('/', (req, res) => {
     res.send('API do Otimizador Shopee está no ar! (Versão Completa)'); // Mensagem atualizada
 });
 
+// Rota para verificar o Chrome
+app.get('/check-chrome', async (req, res) => {
+    console.log("Recebido pedido GET em /check-chrome");
+    const puppeteer = require('puppeteer');
+    try {
+        // Coleta informações sobre o ambiente
+        const environmentInfo = {
+            node_version: process.version,
+            platform: process.platform,
+            arch: process.arch,
+            env_vars: {
+                PATH: process.env.PATH?.substring(0, 100) + '...',
+                PUPPETEER_EXECUTABLE_PATH: process.env.PUPPETEER_EXECUTABLE_PATH || "não definido"
+            }
+        };
+        
+        // Verifica o Puppeteer
+        const browserFetcher = puppeteer.createBrowserFetcher();
+        
+        // Tenta listar as revisões disponíveis
+        const localRevisions = await browserFetcher.localRevisions();
+        
+        // Tenta iniciar o navegador - teste real
+        const browser = await puppeteer.launch({
+            headless: true,
+            args: ['--no-sandbox', '--disable-setuid-sandbox']
+        });
+        const version = await browser.version();
+        await browser.close();
+        
+        // Retorna todas as informações coletadas
+        res.json({
+            status: "success",
+            message: "Chrome está instalado e funcionando",
+            chrome_version: version,
+            local_revisions: localRevisions,
+            cache_path: browserFetcher.cachePath,
+            environment: environmentInfo
+        });
+    } catch (error) {
+        // Se houver erro, retorna detalhes completos
+        res.status(500).json({
+            status: "error",
+            message: "Erro ao verificar o Chrome",
+            error: {
+                name: error.name,
+                message: error.message,
+                stack: error.stack
+            }
+        });
+    }
+});
+
 // Rota PRINCIPAL para analisar o produto Shopee (LÓGICA REAL RESTAURADA)
 app.post('/api/analisar-produto', async (req, res) => {
     console.log("Recebido pedido POST em /api/analisar-produto (Lógica Completa)"); // Log adicionado
