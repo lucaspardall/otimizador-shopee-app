@@ -1,4 +1,4 @@
-// scraper.js - Versão com Puppeteer e executablePath CORRIGIDO
+// scraper.js - Versão com Puppeteer para renderizar JavaScript
 const puppeteer = require('puppeteer');
 
 // Função auxiliar para rolar a página e carregar conteúdo dinâmico
@@ -6,18 +6,21 @@ async function autoScroll(page) {
     await page.evaluate(async () => {
         await new Promise((resolve) => {
             let totalHeight = 0;
-            const distance = 100; 
-            const scrollDelay = 100; 
-            const maxScrolls = 50; 
+            const distance = 100; // Distância de cada scroll
+            const scrollDelay = 100; // Pequeno delay entre scrolls
+            const maxScrolls = 50; // Limite máximo de scrolls para evitar loops infinitos
             let scrolls = 0;
-            let previousHeight = document.body.scrollHeight;
+            let previousHeight = 0; // Para detetar se a rolagem parou de carregar novo conteúdo
 
             const timer = setInterval(() => {
                 const scrollHeight = document.body.scrollHeight;
                 window.scrollBy(0, distance);
                 totalHeight += distance;
                 scrolls++;
-                if (totalHeight >= scrollHeight - window.innerHeight || scrolls >= maxScrolls || (previousHeight === scrollHeight && scrolls > 10) ) {
+
+                // Parar se o final da página for alcançado, ou se muitos scrolls foram feitos,
+                // ou se a altura não mudar mais (indicando que todo conteúdo carregou)
+                if (totalHeight >= scrollHeight - window.innerHeight || scrolls >= maxScrolls || previousHeight === scrollHeight) {
                     clearInterval(timer);
                     resolve();
                 }
@@ -31,37 +34,42 @@ async function scrapeShopeeProduct(url) {
     let browser = null;
     console.log(`[Scraper Puppeteer] Iniciando para: ${url}`);
     try {
-        console.log('[Scraper Puppeteer] Tentando iniciar o browser...');
+        console.log(`[Scraper Puppeteer] Tentando iniciar o browser...`);
         
-        // Caminho onde o Chrome deve ser instalado pelo script de build no package.json
-        // CORREÇÃO: Adicionado '64' a 'chrome-linux64'
-        const chromeExecutablePath = '/tmp/puppeteer-cache/chrome/linux-127.0.6533.88/chrome-linux64/chrome';
-
-        browser = await puppeteer.launch({
-            headless: true,
-            executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || chromeExecutablePath, // Usa variável de ambiente ou o caminho fixo corrigido
+        // Opções para o Render.com e ambientes com recursos limitados
+        const launchOptions = {
+            headless: true, // 'new' para o novo modo headless, true para o antigo. true é mais compatível.
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
-                '--disable-dev-shm-usage',
+                '--disable-dev-shm-usage', // Importante para ambientes como Docker/Render
                 '--disable-accelerated-2d-canvas',
-                '--disable-gpu',
-                '--window-size=1366,768',
-                '--single-process',
-                '--no-zygote'
+                '--disable-gpu', // Útil em ambientes sem GPU
+                '--window-size=1366,768', // Define um tamanho de janela
+                '--single-process', // Pode ajudar em ambientes com pouca memória
+                '--no-zygote' // Pode ajudar em ambientes com pouca memória
             ]
-        });
-        console.log('[Scraper Puppeteer] Browser iniciado.');
+        };
+        
+        // Usa o caminho do executável do Chrome se fornecido pelo ambiente
+        if (process.env.PUPPETEER_EXECUTABLE_PATH) {
+            console.log(`[Scraper Puppeteer] Usando PUPPETEER_EXECUTABLE_PATH: ${process.env.PUPPETEER_EXECUTABLE_PATH}`);
+            launchOptions.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
+        }
+
+        browser = await puppeteer.launch(launchOptions);
+        console.log(`[Scraper Puppeteer] Browser iniciado.`);
 
         const page = await browser.newPage();
-        console.log('[Scraper Puppeteer] Nova página criada.');
+        console.log(`[Scraper Puppeteer] Nova página criada.`);
 
-        await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36');
+        await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36'); // User agent mais recente
         await page.setViewport({ width: 1366, height: 768 });
 
+        // Configuração extra para tentar evitar detecção (stealth)
         await page.evaluateOnNewDocument(() => {
             Object.defineProperty(navigator, 'webdriver', { get: () => false });
-            Object.defineProperty(navigator, 'languages', { get: () => ['pt-BR', 'pt', 'en-US', 'en'] });
+            Object.defineProperty(navigator, 'languages', { get: () => ['pt-BR', 'pt', 'en-US', 'en'] }); // Adiciona mais idiomas
             Object.defineProperty(navigator, 'plugins', {
                  get: () => [
                     { name: "Chrome PDF Plugin", filename: "internal-pdf-viewer", description: "Portable Document Format" },
@@ -69,9 +77,11 @@ async function scrapeShopeeProduct(url) {
                     { name: "Native Client", filename: "internal-nacl-plugin", description: "" }
                  ]
             });
-             Object.defineProperty(navigator, 'platform', { get: () => 'Win32' });
+            // Simula consistência de plataforma
+             Object.defineProperty(navigator, 'platform', { get: () => 'Win32' }); // Ou 'MacIntel', 'Linux x86_64'
         });
         
+        // Intercepta requisições de imagem, css e fontes para acelerar o carregamento e reduzir uso de dados
         await page.setRequestInterception(true);
         page.on('request', (req) => {
             if (['image', 'stylesheet', 'font', 'media'].includes(req.resourceType())) {
@@ -81,22 +91,25 @@ async function scrapeShopeeProduct(url) {
             }
         });
 
-        page.setDefaultNavigationTimeout(90000); 
+        // Aumenta o timeout de navegação padrão
+        page.setDefaultNavigationTimeout(90000); // 90 segundos
 
         console.log(`[Scraper Puppeteer] Navegando para ${url}...`);
         await page.goto(url, {
-            waitUntil: 'networkidle0', 
-            timeout: 60000 
+            waitUntil: 'networkidle0', // Espera até que não haja mais de 0 conexões de rede por 500ms
+            timeout: 60000 // Timeout específico para page.goto (60 segundos)
         });
         console.log('[Scraper Puppeteer] Página principal carregada.');
 
+        // Rola a página para baixo para tentar carregar conteúdo dinâmico
         console.log('[Scraper Puppeteer] Rolando a página...');
         await autoScroll(page);
         console.log('[Scraper Puppeteer] Rolagem concluída. Aguardando um pouco mais...');
-        await new Promise(resolve => setTimeout(resolve, 5000)); 
+        await new Promise(resolve => setTimeout(resolve, 5000)); // Espera adicional para garantir que tudo carregou
 
-        const screenshotPath = '/tmp/shopee-debug.png'; 
+        // Tenta salvar screenshot para debug (pode não funcionar em todos os ambientes)
         try {
+            const screenshotPath = '/tmp/shopee-debug.png'; 
             await page.screenshot({ path: screenshotPath, fullPage: true });
             console.log(`[Scraper Puppeteer] Screenshot salvo em ${screenshotPath}.`);
         } catch (ssError) {
@@ -104,18 +117,24 @@ async function scrapeShopeeProduct(url) {
         }
 
         console.log('[Scraper Puppeteer] Extraindo dados...');
+        // Executa código JavaScript no contexto da página para extrair os dados
         const dadosExtraidos = await page.evaluate(() => {
-            const getText = (selectors, attribute = null) => { 
+            // Função auxiliar para tentar diferentes seletores e obter texto
+            const getText = (selectors, attribute = null) => {
                 for (const selector of selectors) {
                     const element = document.querySelector(selector);
                     if (element) {
-                        if (attribute) return element.getAttribute(attribute)?.trim() || null;
+                        if (attribute) {
+                            return element.getAttribute(attribute)?.trim() || null;
+                        }
                         return element.innerText?.trim() || null;
                     }
                 }
                 return null;
             };
-            const getAllText = (selectors, attribute = null) => { 
+            
+            // Função auxiliar para obter todos os textos de múltiplos elementos
+            const getAllText = (selectors, attribute = null) => {
                 let results = [];
                 for (const selector of selectors) {
                     const elements = document.querySelectorAll(selector);
@@ -124,21 +143,25 @@ async function scrapeShopeeProduct(url) {
                             const text = attribute ? el.getAttribute(attribute)?.trim() : el.innerText?.trim();
                             if (text) results.push(text);
                         });
-                        if (results.length > 0) break; 
+                        if (results.length > 0) break; // Se encontrou com um seletor, para
                     }
                 }
                 return results;
             };
             
+            // Seletores (estes são os que precisam de ajuste fino contínuo)
             const titulo = getText(['h1.vR6K3w', 'meta[property="og:title"]', 'div.WBVL_7 > h1', '.qaNIZv > span', '.product-title', '.product-name', '.product-detail__name', '.pdp-mod-product-title', 'h1'], 
                                    'meta[property="og:title"]' === 'meta[property="og:title"]' ? 'content' : null);
+            
             let descricao = "";
             document.querySelectorAll('section.I_DV_3:has(h2.WjNdTR:contains("Descrição do produto")) div.e8lZp3 p.QN2lPu, div.product-description p, div.page-product__content__description > div > div, ._2jz573, .f7AU53, [data-testid="product-description"]').forEach(p => {
                 const text = p.innerText?.trim();
                 if (text) descricao += text + "\n";
             });
             descricao = descricao.trim() || getText(['meta[property="og:description"]'], 'content');
+
             const preco = getText(['div.IZPeQz.B67UQ0', 'div._3_ISdg', 'div.flex.items-center div.G27FPf', '.price', '.product-price', '.product-detail__price', '.pdp-price', '._2Shl1j', '.pqTWkA', '.XxUO7S']); 
+
             let categoria = "";
             document.querySelectorAll('div.page-product_breadcrumb a.EtYbJs, div.flex.items-center.RB266L a, div.ybxj32 div.idLK2l a.EtYbJs.R7vGdX, .breadcrumb a, .KOuwVw a, .shopee-breadcrumb a').forEach(a => {
                 const text = a.innerText?.trim();
@@ -146,7 +169,9 @@ async function scrapeShopeeProduct(url) {
                     categoria += (categoria ? " > " : "") + text;
                 }
             });
+            
             const avaliacaoMedia = getText(['div.flex.asFzUa button.flex.e2p50f div.F9RHbS.dQEiAI.jMXp4d', 'span.product-rating-overview__rating-score', 'div.OitLRu', '.shopee-product-rating__rating-score', '.rating', '.product-rating', '.pdp-review-summary__rating']);
+            
             let quantidadeAvaliacoes = null;
             const qtdAvaliacoesElement = document.querySelector('div.flex.asFzUa button.flex.e2p50f div.x1i_He:contains("Avaliações")');
             if (qtdAvaliacoesElement && qtdAvaliacoesElement.previousElementSibling) {
@@ -154,8 +179,11 @@ async function scrapeShopeeProduct(url) {
             } else {
                  quantidadeAvaliacoes = getText(['div.product-rating-overview__filters div.product-rating-overview__filter--active', '.shopee-product-rating__total-rating', '.reviews-count', '.rating-review-count'])?.match(/\(([\d.,kKmM]+)\)/)?.[1];
             }
+            
             const nomeLoja = getText(['div.r74CsV div.PYEGyz div.fV3TIn', 'div._3LybD1', 'a.shop-name', '.shop-name', '.seller-name', '.pdp-shop__name']);
+
             const variacoes = getAllText(['div.flex.items-center.j7HL5Q button.sApkZm', 'button.product-variation', '.variation-item', '[data-testid="product-variation"]'], 'aria-label');
+
             return {
                 tituloOriginal: titulo || "Título não encontrado",
                 descricaoOriginal: descricao || "Descrição não encontrada",
