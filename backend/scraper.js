@@ -1,4 +1,4 @@
-// scraper.js - AJUSTAR SELETORES CSS (v4)
+// scraper.js - Seletores Refinados com base no HTML Completo
 const axios = require('axios');
 const cheerio = require('cheerio');
 
@@ -16,75 +16,72 @@ async function scrapeShopeeProduct(url) {
         const $ = cheerio.load(html);
         console.log("[Scraper] Página carregada, iniciando extração...");
 
-        // =====================================================================
-        // == Seletores atualizados com base nas informações fornecidas.     ==
-        // == Alguns ainda podem precisar de ajuste fino ou não existir em  ==
-        // == todas as páginas.                                             ==
-        // =====================================================================
-
         // --- Título ---
+        // Prioriza o h1 com a classe específica, depois a meta tag og:title
         const tituloOriginal = $('h1.vR6K3w').first().text()?.trim() 
                             || $('meta[property="og:title"]').attr('content')?.trim(); 
 
         // --- Descrição ---
+        // Concatena o texto de todos os parágrafos dentro da div de descrição principal
         let descricaoOriginal = "";
          $('div.e8lZp3 p.QN2lPu').each((i, el) => {
              const paragraphText = $(el).text()?.trim();
              if (paragraphText) {
-                 descricaoOriginal += paragraphText + "\n"; 
+                 descricaoOriginal += paragraphText + "\n"; // Adiciona nova linha entre parágrafos
              }
          });
-         descricaoOriginal = descricaoOriginal.trim() || $('meta[property="og:description"]').attr('content')?.trim();
+         descricaoOriginal = descricaoOriginal.trim() || $('meta[property="og:description"]').attr('content')?.trim(); // Fallback para meta tag
 
         // --- Preço ---
+        // Usa a div específica que contém o preço ou faixa de preço
         const precoOriginal = $('div.IZPeQz.B67UQ0').first().text()?.trim(); 
 
-        // --- Categoria ---
+        // --- Categoria (Breadcrumbs) ---
+        // Pega os links do breadcrumb principal da página do produto
         let categoriaOriginal = "";
-        $('div.ybxj32 div.idLK2l a.EtYbJs.R7vGdX').each((i, el) => { 
+        $('div.page-product_breadcrumb a.EtYbJs').each((i, el) => { 
             const text = $(el).text()?.trim();
+            // Ignora o primeiro link "Shopee" se ele estiver presente
             if (text && (text.toLowerCase() !== 'shopee' || $(el).attr('href') !== '/')) {
                  categoriaOriginal += (categoriaOriginal ? " > " : "") + text;
             }
         });
-         if (!categoriaOriginal) {
-             $('div[class*="breadcrumb"] a').each((i, el) => {
+        // Fallback se o primeiro seletor não encontrar nada (menos provável com o HTML fornecido)
+        if (!categoriaOriginal) {
+             $('div.ybxj32:has(h3.VJOnTD:contains("Categoria")) div.idLK2l a.EtYbJs').each((i, el) => {
                  const text = $(el).text()?.trim();
-                 if (text && text.toLowerCase() !== 'shopee') {
+                 if (text && (text.toLowerCase() !== 'shopee' || $(el).attr('href') !== '/')) {
                       categoriaOriginal += (categoriaOriginal ? " > " : "") + text;
                  }
              });
-         }
+        }
 
-        // --- Avaliação Média ---
-        const avaliacaoMediaOriginalText = $('span.product-rating-overview__rating-score').first().text()?.trim();
+
+        // --- Avaliação Média (do produto) ---
+        // Pega o score principal da avaliação do produto
+        const avaliacaoMediaOriginalText = $('div.F9RHbS.dQEiAI').first().text()?.trim() 
+                                        || $('span.product-rating-overview__rating-score').first().text()?.trim(); // Fallback
         const avaliacaoMediaOriginal = avaliacaoMediaOriginalText ? `${avaliacaoMediaOriginalText} Estrelas` : "Não encontrada";
 
-        // --- Quantidade de Avaliações ---
-        // Seletor atualizado para o novo HTML fornecido
-        let quantidadeAvaliacoesOriginalText = "";
-        $('div.YnZi6x').each((i, el) => {
-            const label = $(el).find('label.ffHYws').text()?.trim();
-            if (label === 'Avaliações') {
-                quantidadeAvaliacoesOriginalText = $(el).find('span.Cs6w3G').text()?.trim();
-                return false; // Para o loop .each assim que encontrar
-            }
-        });
+        // --- Quantidade de Avaliações (do produto) ---
+        // Pega o número de avaliações totais do produto
+        const quantidadeAvaliacoesOriginalText = $('button.flex.e2p50f div.x1i_He:contains("Avaliações")').prev('div.F9RHbS').text()?.trim()
+                                            || $('button.flex.e2p50f div.F9RHbS:not(.dQEiAI)').first().text()?.trim(); // Fallback tentando pegar o segundo F9RHbS
         const quantidadeAvaliacoesOriginal = quantidadeAvaliacoesOriginalText ? `${quantidadeAvaliacoesOriginalText} Avaliações` : "Não encontrada";
-
-
+        
         // --- Nome da Loja ---
-        // Seletor atualizado para o novo HTML fornecido
-        const nomeLojaOriginal = $('div.fV3TIn').first().text()?.trim(); 
+        // Pega o nome da loja na seção de informações do vendedor
+        const nomeLojaOriginal = $('div.PYEGyz div.fV3TIn').first().text()?.trim(); 
 
         // --- Variações ---
+        // Pega o aria-label dos botões de variação, que geralmente contém o texto limpo
         const variacoesOriginais = [];
-        $('button.sApkZm').each((i, el) => { 
+        $('div.flex.items-center.j7HL5Q button.sApkZm').each((i, el) => { 
             const text = $(el).attr('aria-label')?.trim(); 
             if (text) variacoesOriginais.push(text);
         });
         
-        console.log("[Scraper] Extração concluída (verificar precisão dos dados).");
+        console.log("[Scraper] Extração preliminar concluída.");
 
         const dadosExtraidos = {
             tituloOriginal: tituloOriginal || "Título não encontrado",
@@ -100,7 +97,7 @@ async function scrapeShopeeProduct(url) {
         console.log("[Scraper] Dados extraídos:", JSON.stringify(dadosExtraidos, null, 2));
 
         if (dadosExtraidos.tituloOriginal === "Título não encontrado" && dadosExtraidos.descricaoOriginal === "Descrição não encontrada") {
-             console.warn("[Scraper] Não foi possível extrair título nem descrição. Seletores podem estar incorretos.");
+             console.warn("[Scraper] Não foi possível extrair título nem descrição. Seletores podem estar incorretos ou a página mudou.");
         }
 
         return dadosExtraidos;
