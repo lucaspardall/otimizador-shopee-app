@@ -23,47 +23,47 @@ async function scrapeShopeeProduct(url) {
         // =====================================================================
 
         // --- Título ---
-        // Procure a tag (h1, div, span?) e classe(s) do título principal
-        const tituloOriginal = $('SELETOR_CSS_DO_TITULO_AQUI').first().text()?.trim() 
-                            || $('meta[property="og:title"]').attr('content')?.trim(); // Fallback para meta tag
+        // Exemplo: Procure por <div class="flex items-center R6VIpR"> <span class="WBVL_7"> TÍTULO AQUI </span> </div> -> Seletor: 'div.R6VIpR span.WBVL_7'
+        const tituloOriginal = $('div.flex.items-center.R6VIpR span.WBVL_7').first().text()?.trim() // <- SUBSTITUA PELO SELETOR REAL
+                            || $('meta[property="og:title"]').attr('content')?.trim(); 
 
         // --- Descrição ---
-        // Procure a div ou parágrafos que contêm a descrição completa
-        const descricaoOriginal = $('SELETOR_CSS_DA_DESCRICAO_AQUI').text()?.trim()
-                               || $('meta[property="og:description"]').attr('content')?.trim(); // Fallback
+        // Exemplo: Procure por <p class="_3yvRG6"> <span> DESCRIÇÃO AQUI </span> </p> -> Seletor: 'p._3yvRG6 span'
+        const descricaoOriginal = $('div.product-description p').text()?.trim() // <- SUBSTITUA PELO SELETOR REAL (pode precisar juntar vários elementos)
+                               || $('meta[property="og:description"]').attr('content')?.trim(); 
 
         // --- Preço ---
-        // Encontrar o elemento que mostra o preço (pode ter variações)
-        const precoOriginal = $('SELETOR_CSS_DO_PRECO_AQUI').first().text()?.trim();
+        // Exemplo: <div class="flex items-center"> <div class="flex items-center"> <div class="G27FPf"> PREÇO AQUI </div> </div> </div> -> Seletor: 'div.G27FPf'
+        const precoOriginal = $('div.G27FPf').first().text()?.trim(); // <- SUBSTITUA PELO SELETOR REAL
 
         // --- Categoria ---
-        // Geralmente nos breadcrumbs (ex: div.breadcrumb > a)
+        // Exemplo: <div class="flex items-center RB266L"> <a href="..."> CAT 1 </a> ... </div> -> Seletor: 'div.RB266L a'
         let categoriaOriginal = "";
-        $('SELETOR_CSS_DOS_BREADCRUMBS_AQUI').each((i, el) => {
+        $('div.flex.items-center.RB266L a').each((i, el) => { // <- SUBSTITUA PELO SELETOR REAL DOS LINKS DO BREADCRUMB
             const text = $(el).text()?.trim();
-            if (text && text.toLowerCase() !== 'shopee') {
+            if (text) {
                  categoriaOriginal += (categoriaOriginal ? " > " : "") + text;
             }
         });
 
         // --- Avaliação Média ---
-        // Encontrar o elemento com a pontuação (ex: 4.8)
-        const avaliacaoMediaOriginalText = $('SELETOR_CSS_DA_PONTUACAO_AQUI').first().text()?.trim();
+        // Exemplo: <div class="flex items-center"> <div class="OitLRu"> 4.8 </div> ... </div> -> Seletor: 'div.OitLRu'
+        const avaliacaoMediaOriginalText = $('div.OitLRu').first().text()?.trim(); // <- SUBSTITUA PELO SELETOR REAL
         const avaliacaoMediaOriginal = avaliacaoMediaOriginalText ? `${avaliacaoMediaOriginalText} Estrelas` : "Não encontrada";
 
         // --- Quantidade de Avaliações ---
-        // Encontrar o elemento com o número total de avaliações
-        const quantidadeAvaliacoesOriginalText = $('SELETOR_CSS_DA_QTD_AVALIACOES_AQUI').first().text()?.trim();
+        // Exemplo: <div class="flex items-center"> ... <div class="acaUPX"> 1.2k </div> <span> avaliações </span> ... </div> -> Seletor: 'div.acaUPX'
+        const quantidadeAvaliacoesOriginalText = $('div.acaUPX').first().text()?.trim(); // <- SUBSTITUA PELO SELETOR REAL
         const quantidadeAvaliacoesOriginal = quantidadeAvaliacoesOriginalText ? `${quantidadeAvaliacoesOriginalText} Avaliações` : "Não encontrada";
 
         // --- Nome da Loja ---
-        // Encontrar o link ou div com o nome da loja
-        const nomeLojaOriginal = $('SELETOR_CSS_DO_NOME_DA_LOJA_AQUI').text()?.trim();
+        // Exemplo: <div class="_6i8g4v"> <div class="official-shop-name"> NOME DA LOJA </div> </div> -> Seletor: 'div.official-shop-name'
+        const nomeLojaOriginal = $('div.official-shop-name').text()?.trim(); // <- SUBSTITUA PELO SELETOR REAL
 
         // --- Variações ---
-        // Encontrar os botões ou spans das variações
+        // Exemplo: <div class="flex items-center Kz6OLM"> <button> VARIAÇÃO 1 </button> <button> VARIAÇÃO 2 </button> </div> -> Seletor: 'div.Kz6OLM button'
         const variacoesOriginais = [];
-        $('SELETOR_CSS_DAS_VARIACOES_AQUI').each((i, el) => {
+        $('div.Kz6OLM button').each((i, el) => { // <- SUBSTITUA PELO SELETOR REAL
             const text = $(el).text()?.trim();
             if (text) variacoesOriginais.push(text);
         });
@@ -71,7 +71,6 @@ async function scrapeShopeeProduct(url) {
 
         console.log("[Scraper] Extração concluída (verificar precisão dos dados).");
 
-        // Retorna um objeto com os dados encontrados
         const dadosExtraidos = {
             tituloOriginal: tituloOriginal || "Título não encontrado",
             descricaoOriginal: descricaoOriginal || "Descrição não encontrada",
@@ -81,19 +80,13 @@ async function scrapeShopeeProduct(url) {
             quantidadeAvaliacoesOriginal: quantidadeAvaliacoesOriginal,
             nomeLojaOriginal: nomeLojaOriginal || "Loja não encontrada",
             variacoesOriginais: variacoesOriginais.length > 0 ? variacoesOriginais : ["Variações não encontradas"]
-            // Adicionar mais campos se necessário
         };
 
-        // Log para verificar os dados extraídos (antes de retornar)
         console.log("[Scraper] Dados extraídos:", JSON.stringify(dadosExtraidos, null, 2));
 
-        // Verifica se pelo menos o título ou descrição foram encontrados
         if (dadosExtraidos.tituloOriginal === "Título não encontrado" && dadosExtraidos.descricaoOriginal === "Descrição não encontrada") {
              console.warn("[Scraper] Não foi possível extrair título nem descrição. Provavelmente os seletores estão incorretos ou a página mudou.");
-             // Pode optar por lançar um erro aqui se título/descrição forem essenciais
-             // throw new Error("Não foi possível extrair informações essenciais do produto.");
         }
-
 
         return dadosExtraidos;
 
@@ -101,12 +94,10 @@ async function scrapeShopeeProduct(url) {
         console.error(`[Scraper] Erro durante o scraping de ${url}:`, error.message);
         if (error.response) {
             console.error("[Scraper] Status do erro HTTP:", error.response.status);
-            // Se for erro 4xx ou 5xx da Shopee, pode indicar bloqueio ou página não encontrada
             if (error.response.status >= 400) {
                  throw new Error(`Falha ao acessar a página do produto (Status ${error.response.status}). Verifique o link ou a Shopee pode ter bloqueado o acesso.`);
             }
         }
-        // Lança um erro genérico para ser tratado no server.js
         throw new Error(`Falha ao fazer scraping da URL: ${error.message}`);
     }
 }
