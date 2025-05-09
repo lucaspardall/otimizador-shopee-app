@@ -1,4 +1,4 @@
-// scraper.js - Seletores Refinados com base no HTML Completo
+// scraper.js - Tentativa de Scraping Real (baseado nos seletores fornecidos)
 const axios = require('axios');
 const cheerio = require('cheerio');
 
@@ -17,12 +17,12 @@ async function scrapeShopeeProduct(url) {
         console.log("[Scraper] Página carregada, iniciando extração...");
 
         // --- Título ---
-        // Prioriza o h1 com a classe vR6K3w, depois a meta tag og:title
-        const tituloOriginal = $('div.WBVL_7 > h1.vR6K3w').first().text()?.trim() 
+        // Seletor atualizado com base na sua informação: h1 com classe vR6K3w
+        const tituloOriginal = $('h1.vR6K3w').first().text()?.trim() 
                             || $('meta[property="og:title"]').attr('content')?.trim(); 
 
         // --- Descrição ---
-        // Concatena o texto de todos os parágrafos dentro da div.e8lZp3
+        // Concatena o texto de todos os parágrafos <p class="QN2lPu"> dentro da seção de descrição
         let descricaoOriginal = "";
          $('section.I_DV_3:has(h2.WjNdTR:contains("Descrição do produto")) div.e8lZp3 p.QN2lPu').each((i, el) => {
              const paragraphText = $(el).text()?.trim();
@@ -33,57 +33,47 @@ async function scrapeShopeeProduct(url) {
          descricaoOriginal = descricaoOriginal.trim() || $('meta[property="og:description"]').attr('content')?.trim(); 
 
         // --- Preço ---
-        // Usa a div específica que contém o preço ou faixa de preço
-        const precoOriginal = $('div.jRlVo0 div.IZPeQz.B67UQ0').first().text()?.trim(); 
+        // Seletor baseado no HTML: <div class="IZPeQz B67UQ0">...</div>
+        const precoOriginal = $('div.IZPeQz.B67UQ0').first().text()?.trim(); 
 
         // --- Categoria (Breadcrumbs) ---
-        // Pega os links do breadcrumb principal da página do produto
+        // Seletor baseado no HTML: <a class="EtYbJs R7vGdX">...</a> dentro de <div class="flex items-center idLK2l">
         let categoriaOriginal = "";
-        $('div.page-product_breadcrumb a.EtYbJs').each((i, el) => { 
+        $('div.page-product_breadcrumb a.EtYbJs.R7vGdX').each((i, el) => { 
             const text = $(el).text()?.trim();
-            if (text && (text.toLowerCase() !== 'shopee')) { // Ignora o link "Shopee"
+            if (text && (text.toLowerCase() !== 'shopee')) { 
                  categoriaOriginal += (categoriaOriginal ? " > " : "") + text;
             }
         });
-        // Fallback se o primeiro seletor não encontrar nada (para a estrutura da seção "Detalhes do Produto")
-        if (!categoriaOriginal) {
-             $('div.ybxj32:has(h3.VJOnTD:contains("Categoria")) div.idLK2l a.EtYbJs').each((i, el) => {
+         if (!categoriaOriginal) { // Fallback para a outra estrutura de categoria
+             $('div.ybxj32:has(h3.VJOnTD:contains("Categoria")) div.idLK2l a.EtYbJs.R7vGdX').each((i, el) => {
                  const text = $(el).text()?.trim();
                  if (text && (text.toLowerCase() !== 'shopee')) {
                       categoriaOriginal += (categoriaOriginal ? " > " : "") + text;
                  }
              });
-        }
-
+         }
 
         // --- Avaliação Média (do produto) ---
-        // Pega o score principal da avaliação do produto
+        // Seletor baseado no HTML: <div class="F9RHbS dQEiAI jMXp4d">4.8</div>
         const avaliacaoMediaOriginalText = $('div.flex.asFzUa button.flex.e2p50f div.F9RHbS.dQEiAI.jMXp4d').first().text()?.trim();
         const avaliacaoMediaOriginal = avaliacaoMediaOriginalText ? `${avaliacaoMediaOriginalText} Estrelas` : "Não encontrada";
 
         // --- Quantidade de Avaliações (do produto) ---
-        // Pega o número de avaliações totais do produto
+        // Seletor baseado no HTML: <div class="F9RHbS">12,4mil</div> ao lado de <div class="x1i_He">Avaliações</div>
         const quantidadeAvaliacoesOriginalText = $('div.flex.asFzUa button.flex.e2p50f div.x1i_He:contains("Avaliações")').prev('div.F9RHbS').text()?.trim();
         const quantidadeAvaliacoesOriginal = quantidadeAvaliacoesOriginalText ? `${quantidadeAvaliacoesOriginalText} Avaliações` : "Não encontrada";
         
         // --- Nome da Loja ---
-        // Pega o nome da loja na seção de informações do vendedor
+        // Seletor baseado no HTML: <div class="fV3TIn">Ferraz Modas</div>
         const nomeLojaOriginal = $('div.r74CsV div.PYEGyz div.fV3TIn').first().text()?.trim(); 
 
         // --- Variações ---
-        // Pega o aria-label dos botões de variação, que geralmente contém o texto limpo
+        // Seletor baseado no HTML: <button class="sApkZm" aria-label="...">...</button>
         const variacoesOriginais = [];
-        // Procura por seções de variação e depois pelos botões dentro delas
-        $('div.flex.flex-column.tKNJvJ section.flex.items-center:has(h2.Dagtcd)').each((i, sectionEl) => {
-            const tipoVariacao = $(sectionEl).find('h2.Dagtcd').text()?.trim();
-            $(sectionEl).find('div.flex.items-center.j7HL5Q button.sApkZm').each((j, btnEl) => {
-                const opcaoVariacao = $(btnEl).attr('aria-label')?.trim();
-                if (tipoVariacao && opcaoVariacao) {
-                    variacoesOriginais.push(`${tipoVariacao}: ${opcaoVariacao}`);
-                } else if (opcaoVariacao) {
-                    variacoesOriginais.push(opcaoVariacao);
-                }
-            });
+        $('div.flex.items-center.j7HL5Q button.sApkZm').each((i, el) => { 
+            const text = $(el).attr('aria-label')?.trim(); 
+            if (text) variacoesOriginais.push(text);
         });
         
         console.log("[Scraper] Extração preliminar concluída.");
