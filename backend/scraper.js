@@ -1,4 +1,4 @@
-// scraper.js - AJUSTAR SELETORES CSS
+// scraper.js - AJUSTAR SELETORES CSS (v4)
 const axios = require('axios');
 const cheerio = require('cheerio');
 
@@ -17,58 +17,73 @@ async function scrapeShopeeProduct(url) {
         console.log("[Scraper] Página carregada, iniciando extração...");
 
         // =====================================================================
-        // == PONTO CRÍTICO: AJUSTAR OS SELETORES CSS ABAIXO ==
-        // == Use as Ferramentas do Desenvolvedor (F12) na página da Shopee ==
-        // == para encontrar os seletores corretos para CADA campo.        ==
+        // == Seletores atualizados com base nas informações fornecidas.     ==
+        // == Alguns ainda podem precisar de ajuste fino ou não existir em  ==
+        // == todas as páginas.                                             ==
         // =====================================================================
 
         // --- Título ---
-        // Exemplo: Procure por <div class="flex items-center R6VIpR"> <span class="WBVL_7"> TÍTULO AQUI </span> </div> -> Seletor: 'div.R6VIpR span.WBVL_7'
-        const tituloOriginal = $('div.flex.items-center.R6VIpR span.WBVL_7').first().text()?.trim() // <- SUBSTITUA PELO SELETOR REAL
+        const tituloOriginal = $('h1.vR6K3w').first().text()?.trim() 
                             || $('meta[property="og:title"]').attr('content')?.trim(); 
 
         // --- Descrição ---
-        // Exemplo: Procure por <p class="_3yvRG6"> <span> DESCRIÇÃO AQUI </span> </p> -> Seletor: 'p._3yvRG6 span'
-        const descricaoOriginal = $('div.product-description p').text()?.trim() // <- SUBSTITUA PELO SELETOR REAL (pode precisar juntar vários elementos)
-                               || $('meta[property="og:description"]').attr('content')?.trim(); 
+        let descricaoOriginal = "";
+         $('div.e8lZp3 p.QN2lPu').each((i, el) => {
+             const paragraphText = $(el).text()?.trim();
+             if (paragraphText) {
+                 descricaoOriginal += paragraphText + "\n"; 
+             }
+         });
+         descricaoOriginal = descricaoOriginal.trim() || $('meta[property="og:description"]').attr('content')?.trim();
 
         // --- Preço ---
-        // Exemplo: <div class="flex items-center"> <div class="flex items-center"> <div class="G27FPf"> PREÇO AQUI </div> </div> </div> -> Seletor: 'div.G27FPf'
-        const precoOriginal = $('div.G27FPf').first().text()?.trim(); // <- SUBSTITUA PELO SELETOR REAL
+        const precoOriginal = $('div.IZPeQz.B67UQ0').first().text()?.trim(); 
 
         // --- Categoria ---
-        // Exemplo: <div class="flex items-center RB266L"> <a href="..."> CAT 1 </a> ... </div> -> Seletor: 'div.RB266L a'
         let categoriaOriginal = "";
-        $('div.flex.items-center.RB266L a').each((i, el) => { // <- SUBSTITUA PELO SELETOR REAL DOS LINKS DO BREADCRUMB
+        $('div.ybxj32 div.idLK2l a.EtYbJs.R7vGdX').each((i, el) => { 
             const text = $(el).text()?.trim();
-            if (text) {
+            if (text && (text.toLowerCase() !== 'shopee' || $(el).attr('href') !== '/')) {
                  categoriaOriginal += (categoriaOriginal ? " > " : "") + text;
             }
         });
+         if (!categoriaOriginal) {
+             $('div[class*="breadcrumb"] a').each((i, el) => {
+                 const text = $(el).text()?.trim();
+                 if (text && text.toLowerCase() !== 'shopee') {
+                      categoriaOriginal += (categoriaOriginal ? " > " : "") + text;
+                 }
+             });
+         }
 
         // --- Avaliação Média ---
-        // Exemplo: <div class="flex items-center"> <div class="OitLRu"> 4.8 </div> ... </div> -> Seletor: 'div.OitLRu'
-        const avaliacaoMediaOriginalText = $('div.OitLRu').first().text()?.trim(); // <- SUBSTITUA PELO SELETOR REAL
+        const avaliacaoMediaOriginalText = $('span.product-rating-overview__rating-score').first().text()?.trim();
         const avaliacaoMediaOriginal = avaliacaoMediaOriginalText ? `${avaliacaoMediaOriginalText} Estrelas` : "Não encontrada";
 
         // --- Quantidade de Avaliações ---
-        // Exemplo: <div class="flex items-center"> ... <div class="acaUPX"> 1.2k </div> <span> avaliações </span> ... </div> -> Seletor: 'div.acaUPX'
-        const quantidadeAvaliacoesOriginalText = $('div.acaUPX').first().text()?.trim(); // <- SUBSTITUA PELO SELETOR REAL
+        // Seletor atualizado para o novo HTML fornecido
+        let quantidadeAvaliacoesOriginalText = "";
+        $('div.YnZi6x').each((i, el) => {
+            const label = $(el).find('label.ffHYws').text()?.trim();
+            if (label === 'Avaliações') {
+                quantidadeAvaliacoesOriginalText = $(el).find('span.Cs6w3G').text()?.trim();
+                return false; // Para o loop .each assim que encontrar
+            }
+        });
         const quantidadeAvaliacoesOriginal = quantidadeAvaliacoesOriginalText ? `${quantidadeAvaliacoesOriginalText} Avaliações` : "Não encontrada";
 
+
         // --- Nome da Loja ---
-        // Exemplo: <div class="_6i8g4v"> <div class="official-shop-name"> NOME DA LOJA </div> </div> -> Seletor: 'div.official-shop-name'
-        const nomeLojaOriginal = $('div.official-shop-name').text()?.trim(); // <- SUBSTITUA PELO SELETOR REAL
+        // Seletor atualizado para o novo HTML fornecido
+        const nomeLojaOriginal = $('div.fV3TIn').first().text()?.trim(); 
 
         // --- Variações ---
-        // Exemplo: <div class="flex items-center Kz6OLM"> <button> VARIAÇÃO 1 </button> <button> VARIAÇÃO 2 </button> </div> -> Seletor: 'div.Kz6OLM button'
         const variacoesOriginais = [];
-        $('div.Kz6OLM button').each((i, el) => { // <- SUBSTITUA PELO SELETOR REAL
-            const text = $(el).text()?.trim();
+        $('button.sApkZm').each((i, el) => { 
+            const text = $(el).attr('aria-label')?.trim(); 
             if (text) variacoesOriginais.push(text);
         });
-        // =====================================================================
-
+        
         console.log("[Scraper] Extração concluída (verificar precisão dos dados).");
 
         const dadosExtraidos = {
@@ -85,7 +100,7 @@ async function scrapeShopeeProduct(url) {
         console.log("[Scraper] Dados extraídos:", JSON.stringify(dadosExtraidos, null, 2));
 
         if (dadosExtraidos.tituloOriginal === "Título não encontrado" && dadosExtraidos.descricaoOriginal === "Descrição não encontrada") {
-             console.warn("[Scraper] Não foi possível extrair título nem descrição. Provavelmente os seletores estão incorretos ou a página mudou.");
+             console.warn("[Scraper] Não foi possível extrair título nem descrição. Seletores podem estar incorretos.");
         }
 
         return dadosExtraidos;
