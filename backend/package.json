@@ -5,16 +5,15 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "prebuild": "npx puppeteer browsers install chrome",
-    "postbuild": "echo \"export const CHROME_PATH='/opt/render/.cache/puppeteer/chrome/linux-127.0.6533.88/chrome-linux64/chrome'\" > chrome-path.js",
-    "build": "npx puppeteer browsers list && echo 'Build completed with Chrome installation'",
+    "build": "echo 'Build sem instalação explícita de Chrome (usando chrome-aws-lambda)'",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
     "axios": "^1.7.2",
+    "chrome-aws-lambda": "^10.1.0",
     "cors": "^2.8.5",
     "express": "^4.19.2",
-    "puppeteer": "^22.10.0"
+    "puppeteer-core": "^10.1.0"
   },
   "keywords": [
     "shopee",
