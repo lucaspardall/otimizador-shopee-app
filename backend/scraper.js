@@ -16,10 +16,11 @@
             console.log("[Scraper] Página carregada, iniciando extração do título...");
 
             // --- Título ---
+            // Seletor atualizado com base na sua informação: h1 com classe vR6K3w
             const tituloOriginal = $('h1.vR6K3w').first().text()?.trim() 
                                 || $('meta[property="og:title"]').attr('content')?.trim(); 
 
-            console.log("[Scraper] Extração do título concluída.");
+            console.log("[Scraper] Extração do título concluída. Título encontrado:", tituloOriginal); // Log para ver o título
 
             const dadosExtraidos = {
                 tituloOriginal: tituloOriginal || "Título não encontrado pelo scraper",
