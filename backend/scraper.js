@@ -1,4 +1,4 @@
-// scraper.js - Versão com Puppeteer e executablePath configurado
+// scraper.js - Versão com Puppeteer e executablePath CORRIGIDO
 const puppeteer = require('puppeteer');
 
 // Função auxiliar para rolar a página e carregar conteúdo dinâmico
@@ -6,9 +6,9 @@ async function autoScroll(page) {
     await page.evaluate(async () => {
         await new Promise((resolve) => {
             let totalHeight = 0;
-            const distance = 100;
-            const scrollDelay = 100;
-            const maxScrolls = 50;
+            const distance = 100; 
+            const scrollDelay = 100; 
+            const maxScrolls = 50; 
             let scrolls = 0;
             let previousHeight = document.body.scrollHeight;
 
@@ -34,13 +34,12 @@ async function scrapeShopeeProduct(url) {
         console.log('[Scraper Puppeteer] Tentando iniciar o browser...');
         
         // Caminho onde o Chrome deve ser instalado pelo script de build no package.json
-        // A versão 127.0.6533.88 foi mencionada no erro anterior.
-        // O Render usa Linux, então o caminho interno para o executável é geralmente 'chrome' dentro da pasta 'chrome-linux'.
-        const chromeExecutablePath = '/tmp/puppeteer-cache/chrome/linux-127.0.6533.88/chrome-linux/chrome';
+        // CORREÇÃO: Adicionado '64' a 'chrome-linux64'
+        const chromeExecutablePath = '/tmp/puppeteer-cache/chrome/linux-127.0.6533.88/chrome-linux64/chrome';
 
         browser = await puppeteer.launch({
             headless: true,
-            executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || chromeExecutablePath, // Usa variável de ambiente ou o caminho fixo
+            executablePath: process.env.PUPPETEER_EXECUTABLE_PATH || chromeExecutablePath, // Usa variável de ambiente ou o caminho fixo corrigido
             args: [
                 '--no-sandbox',
                 '--disable-setuid-sandbox',
@@ -106,7 +105,7 @@ async function scrapeShopeeProduct(url) {
 
         console.log('[Scraper Puppeteer] Extraindo dados...');
         const dadosExtraidos = await page.evaluate(() => {
-            const getText = (selectors, attribute = null) => { /* ... (função mantida) ... */ 
+            const getText = (selectors, attribute = null) => { 
                 for (const selector of selectors) {
                     const element = document.querySelector(selector);
                     if (element) {
@@ -116,7 +115,7 @@ async function scrapeShopeeProduct(url) {
                 }
                 return null;
             };
-            const getAllText = (selectors, attribute = null) => { /* ... (função mantida) ... */ 
+            const getAllText = (selectors, attribute = null) => { 
                 let results = [];
                 for (const selector of selectors) {
                     const elements = document.querySelectorAll(selector);
