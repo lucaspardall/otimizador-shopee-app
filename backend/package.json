@@ -5,7 +5,8 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "build": "echo 'Build completed'",
+    "prebuild": "npx puppeteer browsers install chrome",
+    "build": "echo 'Build completed with Chrome installation'",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
