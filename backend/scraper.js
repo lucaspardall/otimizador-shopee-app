@@ -17,40 +17,39 @@ async function scrapeShopeeProduct(url) {
         console.log("[Scraper] Página carregada, iniciando extração...");
 
         // --- Título ---
-        // Prioriza o h1 com a classe específica, depois a meta tag og:title
-        const tituloOriginal = $('h1.vR6K3w').first().text()?.trim() 
+        // Prioriza o h1 com a classe vR6K3w, depois a meta tag og:title
+        const tituloOriginal = $('div.WBVL_7 > h1.vR6K3w').first().text()?.trim() 
                             || $('meta[property="og:title"]').attr('content')?.trim(); 
 
         // --- Descrição ---
-        // Concatena o texto de todos os parágrafos dentro da div de descrição principal
+        // Concatena o texto de todos os parágrafos dentro da div.e8lZp3
         let descricaoOriginal = "";
-         $('div.e8lZp3 p.QN2lPu').each((i, el) => {
+         $('section.I_DV_3:has(h2.WjNdTR:contains("Descrição do produto")) div.e8lZp3 p.QN2lPu').each((i, el) => {
              const paragraphText = $(el).text()?.trim();
              if (paragraphText) {
-                 descricaoOriginal += paragraphText + "\n"; // Adiciona nova linha entre parágrafos
+                 descricaoOriginal += paragraphText + "\n"; 
              }
          });
-         descricaoOriginal = descricaoOriginal.trim() || $('meta[property="og:description"]').attr('content')?.trim(); // Fallback para meta tag
+         descricaoOriginal = descricaoOriginal.trim() || $('meta[property="og:description"]').attr('content')?.trim(); 
 
         // --- Preço ---
         // Usa a div específica que contém o preço ou faixa de preço
-        const precoOriginal = $('div.IZPeQz.B67UQ0').first().text()?.trim(); 
+        const precoOriginal = $('div.jRlVo0 div.IZPeQz.B67UQ0').first().text()?.trim(); 
 
         // --- Categoria (Breadcrumbs) ---
         // Pega os links do breadcrumb principal da página do produto
         let categoriaOriginal = "";
         $('div.page-product_breadcrumb a.EtYbJs').each((i, el) => { 
             const text = $(el).text()?.trim();
-            // Ignora o primeiro link "Shopee" se ele estiver presente
-            if (text && (text.toLowerCase() !== 'shopee' || $(el).attr('href') !== '/')) {
+            if (text && (text.toLowerCase() !== 'shopee')) { // Ignora o link "Shopee"
                  categoriaOriginal += (categoriaOriginal ? " > " : "") + text;
             }
         });
-        // Fallback se o primeiro seletor não encontrar nada (menos provável com o HTML fornecido)
+        // Fallback se o primeiro seletor não encontrar nada (para a estrutura da seção "Detalhes do Produto")
         if (!categoriaOriginal) {
              $('div.ybxj32:has(h3.VJOnTD:contains("Categoria")) div.idLK2l a.EtYbJs').each((i, el) => {
                  const text = $(el).text()?.trim();
-                 if (text && (text.toLowerCase() !== 'shopee' || $(el).attr('href') !== '/')) {
+                 if (text && (text.toLowerCase() !== 'shopee')) {
                       categoriaOriginal += (categoriaOriginal ? " > " : "") + text;
                  }
              });
@@ -59,26 +58,32 @@ async function scrapeShopeeProduct(url) {
 
         // --- Avaliação Média (do produto) ---
         // Pega o score principal da avaliação do produto
-        const avaliacaoMediaOriginalText = $('div.F9RHbS.dQEiAI').first().text()?.trim() 
-                                        || $('span.product-rating-overview__rating-score').first().text()?.trim(); // Fallback
+        const avaliacaoMediaOriginalText = $('div.flex.asFzUa button.flex.e2p50f div.F9RHbS.dQEiAI.jMXp4d').first().text()?.trim();
         const avaliacaoMediaOriginal = avaliacaoMediaOriginalText ? `${avaliacaoMediaOriginalText} Estrelas` : "Não encontrada";
 
         // --- Quantidade de Avaliações (do produto) ---
         // Pega o número de avaliações totais do produto
-        const quantidadeAvaliacoesOriginalText = $('button.flex.e2p50f div.x1i_He:contains("Avaliações")').prev('div.F9RHbS').text()?.trim()
-                                            || $('button.flex.e2p50f div.F9RHbS:not(.dQEiAI)').first().text()?.trim(); // Fallback tentando pegar o segundo F9RHbS
+        const quantidadeAvaliacoesOriginalText = $('div.flex.asFzUa button.flex.e2p50f div.x1i_He:contains("Avaliações")').prev('div.F9RHbS').text()?.trim();
         const quantidadeAvaliacoesOriginal = quantidadeAvaliacoesOriginalText ? `${quantidadeAvaliacoesOriginalText} Avaliações` : "Não encontrada";
         
         // --- Nome da Loja ---
         // Pega o nome da loja na seção de informações do vendedor
-        const nomeLojaOriginal = $('div.PYEGyz div.fV3TIn').first().text()?.trim(); 
+        const nomeLojaOriginal = $('div.r74CsV div.PYEGyz div.fV3TIn').first().text()?.trim(); 
 
         // --- Variações ---
         // Pega o aria-label dos botões de variação, que geralmente contém o texto limpo
         const variacoesOriginais = [];
-        $('div.flex.items-center.j7HL5Q button.sApkZm').each((i, el) => { 
-            const text = $(el).attr('aria-label')?.trim(); 
-            if (text) variacoesOriginais.push(text);
+        // Procura por seções de variação e depois pelos botões dentro delas
+        $('div.flex.flex-column.tKNJvJ section.flex.items-center:has(h2.Dagtcd)').each((i, sectionEl) => {
+            const tipoVariacao = $(sectionEl).find('h2.Dagtcd').text()?.trim();
+            $(sectionEl).find('div.flex.items-center.j7HL5Q button.sApkZm').each((j, btnEl) => {
+                const opcaoVariacao = $(btnEl).attr('aria-label')?.trim();
+                if (tipoVariacao && opcaoVariacao) {
+                    variacoesOriginais.push(`${tipoVariacao}: ${opcaoVariacao}`);
+                } else if (opcaoVariacao) {
+                    variacoesOriginais.push(opcaoVariacao);
+                }
+            });
         });
         
         console.log("[Scraper] Extração preliminar concluída.");
