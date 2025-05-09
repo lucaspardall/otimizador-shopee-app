@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node server.js",
     "prebuild": "npx puppeteer browsers install chrome",
+    "postbuild": "echo \"export const CHROME_PATH='/opt/render/.cache/puppeteer/chrome/linux-127.0.6533.88/chrome-linux64/chrome'\" > chrome-path.js",
     "build": "npx puppeteer browsers list && echo 'Build completed with Chrome installation'",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
