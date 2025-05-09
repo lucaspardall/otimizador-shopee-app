@@ -1,4 +1,4 @@
-// scraper.js - Versão com ScraperAPI
+// scraper.js - Versão corrigida para ScraperAPI
 const axios = require('axios');
 const cheerio = require('cheerio');
 
@@ -8,8 +8,8 @@ const API_KEY = '1a88769b0247472aefd034cce71ca771';
 async function scrapeShopeeProduct(url) {
     console.log(`[ScraperAPI] Iniciando raspagem para: ${url}`);
     try {
-        // Faz a requisição para a API de scraping
-        const response = await axios.get('https://api.scraperapi.com/scrape', {
+        // URL CORRIGIDA: Endpoint correto sem "/scrape"
+        const response = await axios.get('https://api.scraperapi.com/', {
             params: {
                 api_key: API_KEY,
                 url: url,
@@ -37,11 +37,10 @@ async function scrapeShopeeProduct(url) {
         });
         descricao = descricao.trim() || $('meta[property="og:description"]').attr('content') || "Descrição não encontrada";
         
-        // Extração do preço
+        // Restante do código de extração permanece o mesmo...
         const preco = $('div.IZPeQz.B67UQ0, div._3_ISdg, div.flex.items-center div.G27FPf, .price, .product-price, .product-detail__price, .pdp-price, ._2Shl1j, .pqTWkA, .XxUO7S').first().text().trim() || 
                      "Preço não encontrado";
         
-        // Extração da categoria
         let categoria = "";
         $('div.page-product_breadcrumb a.EtYbJs, div.flex.items-center.RB266L a, div.ybxj32 div.idLK2l a.EtYbJs.R7vGdX, .breadcrumb a, .KOuwVw a, .shopee-breadcrumb a').each((i, el) => {
             const text = $(el).text().trim();
@@ -51,11 +50,9 @@ async function scrapeShopeeProduct(url) {
         });
         categoria = categoria || "Categoria não encontrada";
         
-        // Extração da avaliação média
         const avaliacaoMedia = $('div.flex.asFzUa button.flex.e2p50f div.F9RHbS.dQEiAI.jMXp4d, span.product-rating-overview__rating-score, div.OitLRu, .shopee-product-rating__rating-score, .rating, .product-rating, .pdp-review-summary__rating').first().text().trim() || 
                              "Avaliação não encontrada";
         
-        // Extração da quantidade de avaliações
         let quantidadeAvaliacoes = "";
         const avalText = $('div.flex.asFzUa button.flex.e2p50f div.x1i_He:contains("Avaliações")').prev().text().trim() ||
                        $('div.product-rating-overview__filters div.product-rating-overview__filter--active, .shopee-product-rating__total-rating, .reviews-count, .rating-review-count').first().text().trim();
@@ -67,11 +64,9 @@ async function scrapeShopeeProduct(url) {
             quantidadeAvaliacoes = "Qtd. Avaliações não encontrada";
         }
         
-        // Extração do nome da loja
         const nomeLoja = $('div.r74CsV div.PYEGyz div.fV3TIn, div._3LybD1, a.shop-name, .shop-name, .seller-name, .pdp-shop__name').first().text().trim() ||
                        "Loja não encontrada";
         
-        // Extração das variações
         const variacoes = [];
         $('div.flex.items-center.j7HL5Q button.sApkZm, button.product-variation, .variation-item, [data-testid="product-variation"]').each((i, el) => {
             const text = $(el).attr('aria-label') || $(el).text().trim();
