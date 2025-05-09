@@ -1,5 +1,29 @@
-{
-  "dependencies": {
-    "puppeteer": "^24.8.2"
-  }
-}
+    {
+      "name": "otimizador-shopee-backend",
+      "version": "1.0.0",
+      "description": "Backend para o Otimizador Inteligente Shopee",
+      "main": "server.js",
+      "scripts": {
+        "start": "node server.js",
+        "test": "echo \"Error: no test specified\" && exit 1"
+      },
+      "dependencies": {
+        "axios": "^1.7.2",  // Use a versão mais recente ou a que você instalou
+        "cors": "^2.8.5",
+        "express": "^4.19.2", // Use a versão mais recente ou a que você instalou
+        "puppeteer": "^22.10.0" // Use a versão mais recente ou a que você instalou
+        // O Cheerio não é mais necessário se estivermos a usar Puppeteer exclusivamente no scraper.js
+        // "cheerio": "^1.0.0-rc.12", 
+      },
+      "keywords": [
+        "shopee",
+        "otimizador",
+        "api"
+      ],
+      "author": "Seu Nome Aqui",
+      "license": "ISC",
+      "engines": {
+        "node": ">=18.0.0" // Recomendado para Puppeteer
+      }
+    }
+    
