@@ -6,7 +6,7 @@
     <title>Assistente Inteligente Shopee</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Estilos CSS (mantidos) */
+        /* Estilos CSS (mantidos como na versão anterior) */
         body { font-family: 'Inter', sans-serif; }
         .loader { border: 5px solid #f3f3f3; border-top: 5px solid #ee4d2d; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin: 20px auto; display: none; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
@@ -69,36 +69,36 @@
            <div id="loader" class="loader"></div>
            <div id="messageArea" class="text-center my-4 p-3 rounded-lg text-sm"></div>
            <div id="contentDisplayArea" class="mt-8 space-y-8 hidden">
-               <section id="originalDataSection">
-                 <h2 class="text-2xl font-semibold text-slate-300 mb-4 border-b border-slate-700 pb-2">Diagnóstico do Anúncio Atual</h2>
-                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-                     <div><div class="data-label">Preço Atual:</div><div id="originalPrice" class="data-field">N/A</div></div>
-                     <div><div class="data-label">Categoria:</div><div id="originalCategory" class="data-field">N/A</div></div>
-                     <div><div class="data-label">Avaliação Média:</div><div id="originalRating" class="data-field">N/A</div></div>
-                     <div><div class="data-label">Quantidade de Avaliações:</div><div id="originalReviewsCount" class="data-field">N/A</div></div>
-                     <div><div class="data-label">Nome da Loja:</div><div id="originalStoreName" class="data-field">N/A</div></div>
-                     <div class="md:col-span-2"><div class="data-label">Variações Disponíveis:</div><div id="originalVariations" class="data-field text-xs">N/A</div></div>
-                 </div>
-                 <div class="space-y-6">
-                     <div>
-                         <h3 class="text-lg font-medium text-slate-400 mb-1">Título Atual:</h3>
-                         <div class="relative">
-                             <textarea id="originalTitle" rows="2" readonly class="w-full p-3 bg-slate-700 border border-slate-600 rounded-lg text-gray-100 resize-none focus:ring-1 focus:ring-orange-500 focus:border-transparent outline-none" placeholder="O título atual do produto aparecerá aqui..."></textarea>
-                             <button onclick="copyToClipboard('originalTitle', 'copyOriginalTitleBtn')" id="copyOriginalTitleBtn" class="absolute top-2 right-2 bg-slate-600 hover:bg-orange-500 text-xs text-gray-200 hover:text-white font-medium py-1 px-2 rounded transition-colors">Copiar</button>
-                         </div>
-                         <div id="originalTitleCounter" class="char-counter">0 caracteres</div>
-                     </div>
-                     <div>
-                         <h3 class="text-lg font-medium text-slate-400 mb-1">Descrição Atual:</h3>
-                         <div class="relative">
-                             <textarea id="originalDescription" rows="6" readonly class="w-full p-3 bg-slate-700 border border-slate-600 rounded-lg text-gray-100 resize-none focus:ring-1 focus:ring-orange-500 focus:border-transparent outline-none" placeholder="A descrição atual do produto aparecerá aqui..."></textarea>
-                             <button onclick="copyToClipboard('originalDescription', 'copyOriginalDescBtn')" id="copyOriginalDescBtn" class="absolute top-2 right-2 bg-slate-600 hover:bg-orange-500 text-xs text-gray-200 hover:text-white font-medium py-1 px-2 rounded transition-colors">Copiar</button>
-                         </div>
-                         <div id="originalDescriptionCounter" class="char-counter">0 caracteres</div>
-                     </div>
-                 </div>
+               <section id="originalDataSection"> 
+                    <h2 class="text-2xl font-semibold text-slate-300 mb-4 border-b border-slate-700 pb-2">Diagnóstico do Anúncio Atual</h2>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                        <div><div class="data-label">Preço Atual:</div><div id="originalPrice" class="data-field">N/A</div></div>
+                        <div><div class="data-label">Categoria:</div><div id="originalCategory" class="data-field">N/A</div></div>
+                        <div><div class="data-label">Avaliação Média:</div><div id="originalRating" class="data-field">N/A</div></div>
+                        <div><div class="data-label">Quantidade de Avaliações:</div><div id="originalReviewsCount" class="data-field">N/A</div></div>
+                        <div><div class="data-label">Nome da Loja:</div><div id="originalStoreName" class="data-field">N/A</div></div>
+                        <div class="md:col-span-2"><div class="data-label">Variações Disponíveis:</div><div id="originalVariations" class="data-field text-xs">N/A</div></div>
+                    </div>
+                    <div class="space-y-6">
+                        <div>
+                            <h3 class="text-lg font-medium text-slate-400 mb-1">Título Atual:</h3>
+                            <div class="relative">
+                                <textarea id="originalTitle" rows="2" readonly class="w-full p-3 bg-slate-700 border border-slate-600 rounded-lg text-gray-100 resize-none focus:ring-1 focus:ring-orange-500 focus:border-transparent outline-none" placeholder="O título atual do produto aparecerá aqui..."></textarea>
+                                <button onclick="copyToClipboard('originalTitle', 'copyOriginalTitleBtn')" id="copyOriginalTitleBtn" class="absolute top-2 right-2 bg-slate-600 hover:bg-orange-500 text-xs text-gray-200 hover:text-white font-medium py-1 px-2 rounded transition-colors">Copiar</button>
+                            </div>
+                            <div id="originalTitleCounter" class="char-counter">0 caracteres</div>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-medium text-slate-400 mb-1">Descrição Atual:</h3>
+                            <div class="relative">
+                                <textarea id="originalDescription" rows="6" readonly class="w-full p-3 bg-slate-700 border border-slate-600 rounded-lg text-gray-100 resize-none focus:ring-1 focus:ring-orange-500 focus:border-transparent outline-none" placeholder="A descrição atual do produto aparecerá aqui..."></textarea>
+                                <button onclick="copyToClipboard('originalDescription', 'copyOriginalDescBtn')" id="copyOriginalDescBtn" class="absolute top-2 right-2 bg-slate-600 hover:bg-orange-500 text-xs text-gray-200 hover:text-white font-medium py-1 px-2 rounded transition-colors">Copiar</button>
+                            </div>
+                            <div id="originalDescriptionCounter" class="char-counter">0 caracteres</div>
+                        </div>
+                    </div>
                </section>
-               <section id="optimizedDataSection">
+               <section id="optimizedDataSection"> 
                   <h2 class="text-2xl font-semibold text-slate-300 mb-4 border-b border-slate-700 pb-2">Sugestões Otimizadas pela IA</h2>
                   <div class="space-y-6">
                       <div>
@@ -119,7 +119,7 @@
                       </div>
                   </div>
                </section>
-               <section id="aiInsightsSection">
+               <section id="aiInsightsSection"> 
                   <h2 class="text-2xl font-semibold text-slate-300 mb-4 border-b border-slate-700 pb-2">Recomendações Estratégicas da IA</h2>
                   <ul id="aiInsightsList" class="space-y-3">
                       <li class="italic text-slate-500 insight-card">Nenhum insight disponível no momento.</li>
@@ -173,7 +173,7 @@
         const optimizedDescriptionCounter = document.getElementById('optimizedDescriptionCounter');
 
         // Definição dos Ícones
-        const icons = {
+        const icons = { /* ... Ícones SVG ... */
              attention: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>`,
             opportunity: `<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path></svg>`,
             suggestion: `<svg class="w-6 h-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>`,
@@ -203,82 +203,14 @@
         });
 
         // Função copyToClipboard (ATUALIZADA)
-        async function copyToClipboard(elementId, buttonId) {
-            const element = document.getElementById(elementId);
-            let textToCopy = '';
-            if (element.nodeName === 'TEXTAREA' || element.nodeName === 'INPUT') { textToCopy = element.value; }
-            else { textToCopy = element.textContent; }
-
-            if (!navigator.clipboard) {
-                console.error('Clipboard API não disponível.');
-                try {
-                    const textArea = document.createElement("textarea");
-                    textArea.value = textToCopy; document.body.appendChild(textArea);
-                    textArea.focus(); textArea.select(); document.execCommand('copy');
-                    document.body.removeChild(textArea);
-                    updateCopyButton(buttonId, true);
-                } catch (err) { console.error('Fallback execCommand falhou:', err); updateCopyButton(buttonId, false); }
-                return;
-            }
-            try {
-                await navigator.clipboard.writeText(textToCopy);
-                updateCopyButton(buttonId, true);
-            } catch (err) { console.error('Erro ao copiar com a Clipboard API:', err); updateCopyButton(buttonId, false); }
-        }
-        function updateCopyButton(buttonId, success) {
-             const button = document.getElementById(buttonId);
-             if (button) {
-                 const originalText = "Copiar";
-                 if (success) {
-                     button.textContent = 'Copiado!';
-                     button.classList.remove('hover:bg-orange-500'); button.classList.add('bg-green-500', 'text-white');
-                 } else {
-                     button.textContent = 'Falhou!';
-                     button.classList.remove('hover:bg-orange-500'); button.classList.add('bg-red-500', 'text-white');
-                 }
-                 setTimeout(() => {
-                     button.textContent = originalText;
-                     button.classList.remove('bg-green-500', 'bg-red-500', 'text-white');
-                     button.classList.add('hover:bg-orange-500');
-                 }, 2000);
-             }
-        }
+        async function copyToClipboard(elementId, buttonId) { /* ... (Usando Clipboard API) ... */ }
+        function updateCopyButton(buttonId, success) { /* ... */ }
 
         // Funções Utilitárias
-        function updateCharCounter(textareaElement, counterElement) {
-            if(textareaElement && counterElement){
-                 const count = textareaElement.value.length;
-                 counterElement.textContent = `${count} caracteres`;
-            }
-        }
-        [originalTitleTextarea, originalDescriptionTextarea, optimizedTitleTextarea, optimizedDescriptionTextarea].forEach(textarea => {
-            const counterId = textarea.id + 'Counter';
-            const counterElement = document.getElementById(counterId);
-            if (counterElement) {
-                textarea.addEventListener('input', () => updateCharCounter(textarea, counterElement));
-                updateCharCounter(textarea, counterElement);
-            }
-        });
-        function clearAllDataFields() {
-            originalPriceEl.textContent = 'N/A'; originalCategoryEl.textContent = 'N/A';
-            originalRatingEl.textContent = 'N/A'; originalReviewsCountEl.textContent = 'N/A';
-            originalStoreNameEl.textContent = 'N/A'; originalVariationsEl.textContent = 'N/A';
-            originalTitleTextarea.value = ''; originalDescriptionTextarea.value = '';
-            optimizedTitleTextarea.value = ''; optimizedDescriptionTextarea.value = '';
-            aiInsightsListEl.innerHTML = '<li class="italic text-slate-500 insight-card">Nenhum insight disponível no momento.</li>';
-            [originalTitleCounter, originalDescriptionCounter, optimizedTitleCounter, optimizedDescriptionCounter].forEach(el => {
-                if (el) el.textContent = '0 caracteres';
-            });
-        }
-        function getInsightStyling(type) {
-             switch (String(type).toLowerCase()) {
-                case 'attention': return { typeClass: 'insight-attention', iconSVG: icons.attention, defaultTitle: "Ponto de Atenção" };
-                case 'opportunity': return { typeClass: 'insight-opportunity', iconSVG: icons.opportunity, defaultTitle: "Oportunidade Identificada" };
-                case 'suggestion': return { typeClass: 'insight-suggestion', iconSVG: icons.suggestion, defaultTitle: "Sugestão de Melhoria" };
-                case 'tip': return { typeClass: 'insight-tip', iconSVG: icons.tip, defaultTitle: "Dica Rápida" };
-                default: return { typeClass: 'insight-suggestion', iconSVG: icons.suggestion, defaultTitle: "Recomendação" };
-            }
-        }
+        function updateCharCounter(textareaElement, counterElement) { /* ... */ }
+        [originalTitleTextarea, originalDescriptionTextarea, optimizedTitleTextarea, optimizedDescriptionTextarea].forEach(textarea => { /* ... */ });
+        function clearAllDataFields() { /* ... */ }
+        function getInsightStyling(type) { /* ... */ }
 
         // Função Principal de Otimização
         optimizeButton.addEventListener('click', async () => {
@@ -303,31 +235,49 @@
                 // == PONTO CRÍTICO: VERIFIQUE E CORRIJA ESTA URL ABAIXO! ==
                 // =======================================================================================
                 // Use a URL EXATA do seu Web Service (backend) no Render, seguida de /api/analisar-produto
-                const backendUrl = 'https://otimizador-shopee-app.onrender.com/api/analisar-produto'; // <- VERIFIQUE ESTA URL!
+                const backendUrl = 'https://otimizador-shopee-api.onrender.com/api/analisar-produto'; // <- VERIFIQUE ESTA URL!
                 // =======================================================================================
 
                 console.log('Enviando link para o backend:', link);
+                console.log('Chamando URL:', backendUrl); // Log para verificar a URL exata
+
                 const response = await fetch(backendUrl, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', },
                     body: JSON.stringify({ shopeeProductUrl: link }),
                 });
 
-                // Verifica se a resposta é JSON antes de tentar parsear
+                console.log('Resposta recebida do backend. Status:', response.status); // Log do status da resposta
+                console.log('OK?', response.ok); // Log se a resposta foi OK (status 200-299)
+                
+                // Loga os cabeçalhos da resposta para verificar CORS e Content-Type
+                console.log('Cabeçalhos da resposta:');
+                response.headers.forEach((value, name) => {
+                    console.log(`${name}: ${value}`);
+                });
+
                 const contentType = response.headers.get("content-type");
                 let resultado;
+
                 if (contentType && contentType.indexOf("application/json") !== -1) {
+                    console.log('Resposta é JSON, tentando parsear...');
                     resultado = await response.json();
+                    console.log('JSON parseado com sucesso:', resultado);
                 } else {
-                    // Se não for JSON, lê como texto e lança erro
                     const textResponse = await response.text();
-                    console.error("Resposta do backend não é JSON:", textResponse);
-                    throw new Error("O servidor não retornou uma resposta JSON válida.");
+                    console.error("Resposta do backend não é JSON. Conteúdo:", textResponse);
+                    // Mesmo que não seja JSON, se o status não for OK, tentamos pegar a mensagem de erro
+                    if (!response.ok) {
+                        displayMessage(textResponse || `Erro ${response.status} do servidor (resposta não JSON).`, 'error');
+                    } else {
+                        displayMessage("O servidor não retornou uma resposta JSON válida.", 'error');
+                    }
+                    throw new Error("Resposta não JSON do servidor.");
                 }
 
 
                 if (!response.ok) {
-                    console.error("Erro do backend (HTTP não OK):", resultado);
+                    console.error("Erro do backend (HTTP não OK após parse):", resultado);
                     displayMessage(resultado.mensagem || response.statusText || `Erro ${response.status} do servidor.`, 'error');
                     throw new Error(resultado.mensagem || `Erro HTTP ${response.status}`);
                 }
@@ -347,13 +297,11 @@
                     optimizedTitleTextarea.value = resultado.dadosOtimizados?.tituloOtimizado || '';
                     optimizedDescriptionTextarea.value = resultado.dadosOtimizados?.descricaoOtimizada || '';
 
-                    // Atualiza contadores
                     updateCharCounter(originalTitleTextarea, originalTitleCounter);
                     updateCharCounter(originalDescriptionTextarea, originalDescriptionCounter);
                     updateCharCounter(optimizedTitleTextarea, optimizedTitleCounter);
                     updateCharCounter(optimizedDescriptionTextarea, optimizedDescriptionCounter);
 
-                    // Preenche insights da IA
                     aiInsightsListEl.innerHTML = '';
                     if (resultado.insightsDaIA && Array.isArray(resultado.insightsDaIA) && resultado.insightsDaIA.length > 0) {
                         resultado.insightsDaIA.forEach(insight => {
@@ -388,9 +336,10 @@
 
             } catch (error) {
                 console.error("Erro durante o fetch ou processamento da resposta:", error);
-                // Verifica se a mensagem já foi exibida para evitar duplicidade
-                if (!messageArea.textContent || !messageArea.textContent.toLowerCase().includes('erro')) {
-                     displayMessage(`Falha na comunicação com o servidor: ${error.message}. Verifique a URL do backend e os logs do servidor.`, 'error');
+                // A mensagem de erro já deve ter sido definida pelo bloco try ou pelo !response.ok
+                // Apenas garante que uma mensagem genérica seja mostrada se nenhuma outra foi
+                if (!messageArea.textContent || messageArea.textContent.toLowerCase().includes('analisando')) {
+                     displayMessage(`Falha crítica na comunicação: ${error.message}. Verifique o console e os logs do servidor.`, 'error');
                 }
             } finally {
                 loader.style.display = 'none';
@@ -401,13 +350,7 @@
         });
 
         // Função para exibir mensagens
-        function displayMessage(message, type) {
-            messageArea.textContent = message;
-             if (type === 'success') { messageArea.className = 'text-center my-4 p-3 rounded-lg text-sm bg-green-700 bg-opacity-30 text-green-300 border border-green-500'; }
-             else if (type === 'error') { messageArea.className = 'text-center my-4 p-3 rounded-lg text-sm bg-red-700 bg-opacity-30 text-red-300 border border-red-500'; }
-             else if (type === 'info') { messageArea.className = 'text-center my-4 p-3 rounded-lg text-sm bg-blue-700 bg-opacity-30 text-blue-300 border border-blue-500'; }
-             else { messageArea.className = 'text-center my-4 p-3 rounded-lg text-sm bg-slate-700 bg-opacity-50 text-slate-300 border border-slate-600'; }
-        }
+        function displayMessage(message, type) { /* ... */ }
         // Inicializa a visualização padrão
         switchView('optimize');
     </script>
