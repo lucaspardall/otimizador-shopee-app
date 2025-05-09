@@ -1,6 +1,23 @@
 // scraper.js - Versão com Puppeteer para renderizar JavaScript
 const puppeteer = require('puppeteer');
 
+// Diagnóstico do Chrome - Adicionado para verificar instalação
+try {
+    console.log('[Diagnóstico Chrome] Iniciando verificação do Chrome...');
+    const browserFetcher = puppeteer.createBrowserFetcher();
+    console.log('[Diagnóstico Chrome] Diretório do cache:', browserFetcher.cachePath);
+    console.log('[Diagnóstico Chrome] PUPPETEER_EXECUTABLE_PATH:', process.env.PUPPETEER_EXECUTABLE_PATH || 'não definido');
+    
+    // Tenta listar as versões do Chrome disponíveis
+    browserFetcher.localRevisions().then(revisions => {
+        console.log('[Diagnóstico Chrome] Revisões locais disponíveis:', revisions);
+    }).catch(e => {
+        console.error('[Diagnóstico Chrome] Erro ao listar revisões:', e.message);
+    });
+} catch (e) {
+    console.error('[Diagnóstico Chrome] Erro ao verificar Chrome:', e.message);
+}
+
 // Função auxiliar para rolar a página e carregar conteúdo dinâmico
 async function autoScroll(page) {
     await page.evaluate(async () => {
@@ -57,6 +74,7 @@ async function scrapeShopeeProduct(url) {
             launchOptions.executablePath = process.env.PUPPETEER_EXECUTABLE_PATH;
         }
 
+        console.log("[Scraper Puppeteer] Iniciando browser com opções:", JSON.stringify(launchOptions, null, 2));
         browser = await puppeteer.launch(launchOptions);
         console.log(`[Scraper Puppeteer] Browser iniciado.`);
 
