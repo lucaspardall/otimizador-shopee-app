@@ -181,26 +181,10 @@
         };
 
         // Função para trocar de visualização
-        function switchView(viewToShow) {
-            if (viewToShow === 'optimize') {
-                optimizeViewSection.classList.add('active');
-                createViewSection.classList.remove('active');
-                navOptimizeViewBtn.classList.add('active');
-                navCreateViewBtn.classList.remove('active');
-            } else if (viewToShow === 'create') {
-                createViewSection.classList.add('active');
-                optimizeViewSection.classList.remove('active');
-                navCreateViewBtn.classList.add('active');
-                navOptimizeViewBtn.classList.remove('active');
-            }
-        }
-
-        // Listeners para botões de navegação
+        function switchView(viewToShow) { /* ... */ }
         navOptimizeViewBtn.addEventListener('click', () => switchView('optimize'));
         navCreateViewBtn.addEventListener('click', () => switchView('create'));
-        startCreateNewAdButton.addEventListener('click', () => {
-             displayMessage('A funcionalidade de criação de novos anúncios está em desenvolvimento!', 'info');
-        });
+        startCreateNewAdButton.addEventListener('click', () => { displayMessage('A funcionalidade de criação de novos anúncios está em desenvolvimento!', 'info'); });
 
         // Função copyToClipboard (ATUALIZADA)
         async function copyToClipboard(elementId, buttonId) { /* ... (Usando Clipboard API) ... */ }
@@ -235,7 +219,10 @@
                 // == PONTO CRÍTICO: VERIFIQUE E CORRIJA ESTA URL ABAIXO! ==
                 // =======================================================================================
                 // Use a URL EXATA do seu Web Service (backend) no Render, seguida de /api/analisar-produto
-                const backendUrl = 'https://otimizador-shopee-api.onrender.com/api/analisar-produto'; // <- VERIFIQUE ESTA URL!
+                // SE O SEU BACKEND NO RENDER CHAMA-SE 'otimizador-shopee-app', ENTÃO A URL DEVE SER:
+                const backendUrl = 'https://otimizador-shopee-app.onrender.com/api/analisar-produto'; 
+                // Se o seu backend no Render tiver outro nome (ex: 'meu-backend-legal'), use esse nome:
+                // const backendUrl = 'https://meu-backend-legal.onrender.com/api/analisar-produto';
                 // =======================================================================================
 
                 console.log('Enviando link para o backend:', link);
@@ -247,10 +234,9 @@
                     body: JSON.stringify({ shopeeProductUrl: link }),
                 });
 
-                console.log('Resposta recebida do backend. Status:', response.status); // Log do status da resposta
-                console.log('OK?', response.ok); // Log se a resposta foi OK (status 200-299)
+                console.log('Resposta recebida do backend. Status:', response.status); 
+                console.log('OK?', response.ok); 
                 
-                // Loga os cabeçalhos da resposta para verificar CORS e Content-Type
                 console.log('Cabeçalhos da resposta:');
                 response.headers.forEach((value, name) => {
                     console.log(`${name}: ${value}`);
@@ -266,7 +252,6 @@
                 } else {
                     const textResponse = await response.text();
                     console.error("Resposta do backend não é JSON. Conteúdo:", textResponse);
-                    // Mesmo que não seja JSON, se o status não for OK, tentamos pegar a mensagem de erro
                     if (!response.ok) {
                         displayMessage(textResponse || `Erro ${response.status} do servidor (resposta não JSON).`, 'error');
                     } else {
@@ -274,7 +259,6 @@
                     }
                     throw new Error("Resposta não JSON do servidor.");
                 }
-
 
                 if (!response.ok) {
                     console.error("Erro do backend (HTTP não OK após parse):", resultado);
@@ -284,7 +268,7 @@
 
                 if (resultado.status === "sucesso") {
                     displayMessage(resultado.mensagem || 'Análise concluída!', 'success');
-                    // Preenche os dados recebidos do backend
+                    // Preenche os dados recebidos do backend (código mantido)
                     originalPriceEl.textContent = resultado.dadosOriginais?.precoOriginal || 'N/A';
                     originalCategoryEl.textContent = resultado.dadosOriginais?.categoriaOriginal || 'N/A';
                     originalRatingEl.textContent = resultado.dadosOriginais?.avaliacaoMediaOriginal || 'N/A';
@@ -336,8 +320,6 @@
 
             } catch (error) {
                 console.error("Erro durante o fetch ou processamento da resposta:", error);
-                // A mensagem de erro já deve ter sido definida pelo bloco try ou pelo !response.ok
-                // Apenas garante que uma mensagem genérica seja mostrada se nenhuma outra foi
                 if (!messageArea.textContent || messageArea.textContent.toLowerCase().includes('analisando')) {
                      displayMessage(`Falha crítica na comunicação: ${error.message}. Verifique o console e os logs do servidor.`, 'error');
                 }
