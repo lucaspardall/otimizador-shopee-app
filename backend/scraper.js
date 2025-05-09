@@ -1,28 +1,17 @@
-// scraper.js - Versão com Puppeteer para renderizar JavaScript
-const puppeteer = require('puppeteer');
-let CHROME_PATH = '';
-
-// Tenta importar o caminho do Chrome que foi gerado durante o build
-try {
-    const chromePath = require('./chrome-path');
-    CHROME_PATH = chromePath.CHROME_PATH;
-    console.log(`[Scraper Puppeteer] Caminho do Chrome carregado: ${CHROME_PATH}`);
-} catch (e) {
-    console.log('[Scraper Puppeteer] Arquivo de caminho do Chrome não encontrado, usando padrão');
-    // Caminho padrão do Chrome instalado pelo Puppeteer no Render
-    CHROME_PATH = '/opt/render/.cache/puppeteer/chrome/linux-127.0.6533.88/chrome-linux64/chrome';
-}
+// scraper.js - Versão compatível com Render usando chrome-aws-lambda
+const chromium = require('chrome-aws-lambda');
+const puppeteer = require('puppeteer-core');
 
 // Função auxiliar para rolar a página e carregar conteúdo dinâmico
 async function autoScroll(page) {
     await page.evaluate(async () => {
         await new Promise((resolve) => {
             let totalHeight = 0;
-            const distance = 100; // Distância de cada scroll
-            const scrollDelay = 100; // Pequeno delay entre scrolls
-            const maxScrolls = 50; // Limite máximo de scrolls para evitar loops infinitos
+            const distance = 100;
+            const scrollDelay = 100;
+            const maxScrolls = 50;
             let scrolls = 0;
-            let previousHeight = 0; // Para detetar se a rolagem parou de carregar novo conteúdo
+            let previousHeight = 0;
 
             const timer = setInterval(() => {
                 const scrollHeight = document.body.scrollHeight;
@@ -30,8 +19,6 @@ async function autoScroll(page) {
                 totalHeight += distance;
                 scrolls++;
 
-                // Parar se o final da página for alcançado, ou se muitos scrolls foram feitos,
-                // ou se a altura não mudar mais (indicando que todo conteúdo carregou)
                 if (totalHeight >= scrollHeight - window.innerHeight || scrolls >= maxScrolls || previousHeight === scrollHeight) {
                     clearInterval(timer);
                     resolve();
@@ -44,54 +31,45 @@ async function autoScroll(page) {
 
 async function scrapeShopeeProduct(url) {
     let browser = null;
-    console.log(`[Scraper Puppeteer] Iniciando para: ${url}`);
+    console.log(`[Scraper chrome-aws-lambda] Iniciando para: ${url}`);
     try {
-        console.log(`[Scraper Puppeteer] Tentando iniciar o browser...`);
+        console.log(`[Scraper chrome-aws-lambda] Configurando browser...`);
         
-        // Opções para o Render.com e ambientes com recursos limitados
+        // chrome-aws-lambda gerencia o executável do Chrome e suas configurações
+        const executablePath = await chromium.executablePath;
+        console.log(`[Scraper chrome-aws-lambda] Caminho do executável: ${executablePath}`);
+        
         const launchOptions = {
-            headless: true,
-            executablePath: CHROME_PATH, // Usa o caminho específico do Chrome
-            args: [
-                '--no-sandbox',
-                '--disable-setuid-sandbox',
-                '--disable-dev-shm-usage',
-                '--disable-accelerated-2d-canvas',
-                '--disable-gpu',
-                '--window-size=1366,768',
-                '--single-process',
-                '--no-zygote'
-            ]
+            executablePath,
+            headless: chromium.headless,
+            args: chromium.args,
+            defaultViewport: chromium.defaultViewport,
+            ignoreHTTPSErrors: true,
         };
         
-        console.log(`[Scraper Puppeteer] Usando caminho do Chrome: ${launchOptions.executablePath}`);
-        console.log("[Scraper Puppeteer] Iniciando browser com opções:", JSON.stringify(launchOptions, null, 2));
-        
+        console.log(`[Scraper chrome-aws-lambda] Lançando com opções: ${JSON.stringify(launchOptions, null, 2)}`);
         browser = await puppeteer.launch(launchOptions);
-        console.log(`[Scraper Puppeteer] Browser iniciado.`);
+        console.log(`[Scraper chrome-aws-lambda] Browser iniciado com sucesso!`);
 
         const page = await browser.newPage();
-        console.log(`[Scraper Puppeteer] Nova página criada.`);
+        console.log(`[Scraper chrome-aws-lambda] Nova página criada.`);
 
-        await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36'); // User agent mais recente
+        await page.setUserAgent('Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/115.0.0.0 Safari/537.36');
         await page.setViewport({ width: 1366, height: 768 });
 
-        // Configuração extra para tentar evitar detecção (stealth)
+        // Configuração anti-detecção
         await page.evaluateOnNewDocument(() => {
             Object.defineProperty(navigator, 'webdriver', { get: () => false });
-            Object.defineProperty(navigator, 'languages', { get: () => ['pt-BR', 'pt', 'en-US', 'en'] }); // Adiciona mais idiomas
-            Object.defineProperty(navigator, 'plugins', {
-                 get: () => [
-                    { name: "Chrome PDF Plugin", filename: "internal-pdf-viewer", description: "Portable Document Format" },
-                    { name: "Chrome PDF Viewer", filename: "mhjfbmdgcfjbbpaeojofohoefgiehjai", description: "" },
-                    { name: "Native Client", filename: "internal-nacl-plugin", description: "" }
-                 ]
-            });
-            // Simula consistência de plataforma
-             Object.defineProperty(navigator, 'platform', { get: () => 'Win32' }); // Ou 'MacIntel', 'Linux x86_64'
+            Object.defineProperty(navigator, 'languages', { get: () => ['pt-BR', 'pt', 'en-US', 'en'] });
+            Object.defineProperty(navigator, 'plugins', { get: () => [
+                { name: "Chrome PDF Plugin", filename: "internal-pdf-viewer", description: "Portable Document Format" },
+                { name: "Chrome PDF Viewer", filename: "mhjfbmdgcfjbbpaeojofohoefgiehjai", description: "" },
+                { name: "Native Client", filename: "internal-nacl-plugin", description: "" }
+            ]});
+            Object.defineProperty(navigator, 'platform', { get: () => 'Win32' });
         });
         
-        // Intercepta requisições de imagem, css e fontes para acelerar o carregamento e reduzir uso de dados
+        // Bloqueio de recursos para melhorar a performance
         await page.setRequestInterception(true);
         page.on('request', (req) => {
             if (['image', 'stylesheet', 'font', 'media'].includes(req.resourceType())) {
@@ -101,33 +79,21 @@ async function scrapeShopeeProduct(url) {
             }
         });
 
-        // Aumenta o timeout de navegação padrão
-        page.setDefaultNavigationTimeout(90000); // 90 segundos
+        page.setDefaultNavigationTimeout(90000);
 
-        console.log(`[Scraper Puppeteer] Navegando para ${url}...`);
+        console.log(`[Scraper chrome-aws-lambda] Navegando para ${url}...`);
         await page.goto(url, {
-            waitUntil: 'networkidle0', // Espera até que não haja mais de 0 conexões de rede por 500ms
-            timeout: 60000 // Timeout específico para page.goto (60 segundos)
+            waitUntil: 'networkidle0',
+            timeout: 60000
         });
-        console.log('[Scraper Puppeteer] Página principal carregada.');
+        console.log('[Scraper chrome-aws-lambda] Página principal carregada.');
 
-        // Rola a página para baixo para tentar carregar conteúdo dinâmico
-        console.log('[Scraper Puppeteer] Rolando a página...');
+        console.log('[Scraper chrome-aws-lambda] Rolando a página...');
         await autoScroll(page);
-        console.log('[Scraper Puppeteer] Rolagem concluída. Aguardando um pouco mais...');
-        await new Promise(resolve => setTimeout(resolve, 5000)); // Espera adicional para garantir que tudo carregou
+        console.log('[Scraper chrome-aws-lambda] Rolagem concluída. Aguardando...');
+        await new Promise(resolve => setTimeout(resolve, 5000));
 
-        // Tenta salvar screenshot para debug (pode não funcionar em todos os ambientes)
-        try {
-            const screenshotPath = '/tmp/shopee-debug.png'; 
-            await page.screenshot({ path: screenshotPath, fullPage: true });
-            console.log(`[Scraper Puppeteer] Screenshot salvo em ${screenshotPath}.`);
-        } catch (ssError) {
-            console.error(`[Scraper Puppeteer] Erro ao salvar screenshot: ${ssError.message}`);
-        }
-
-        console.log('[Scraper Puppeteer] Extraindo dados...');
-        // Executa código JavaScript no contexto da página para extrair os dados
+        console.log('[Scraper chrome-aws-lambda] Extraindo dados...');
         const dadosExtraidos = await page.evaluate(() => {
             // Função auxiliar para tentar diferentes seletores e obter texto
             const getText = (selectors, attribute = null) => {
@@ -159,7 +125,7 @@ async function scrapeShopeeProduct(url) {
                 return results;
             };
             
-            // Seletores (estes são os que precisam de ajuste fino contínuo)
+            // Seletores para dados do produto
             const titulo = getText(['h1.vR6K3w', 'meta[property="og:title"]', 'div.WBVL_7 > h1', '.qaNIZv > span', '.product-title', '.product-name', '.product-detail__name', '.pdp-mod-product-title', 'h1'], 
                                    'meta[property="og:title"]' === 'meta[property="og:title"]' ? 'content' : null);
             
@@ -206,13 +172,13 @@ async function scrapeShopeeProduct(url) {
             };
         });
 
-        console.log(`[Scraper Puppeteer] Dados extraídos com sucesso. Título: ${dadosExtraidos.tituloOriginal}`);
+        console.log(`[Scraper chrome-aws-lambda] Dados extraídos com sucesso. Título: ${dadosExtraidos.tituloOriginal}`);
         return dadosExtraidos;
 
     } catch (error) {
-        console.error(`[Scraper Puppeteer] ERRO durante o scraping de ${url}:`, error.message, error.stack);
+        console.error(`[Scraper chrome-aws-lambda] ERRO durante o scraping: ${error.message}, Stack: ${error.stack}`);
         return {
-            tituloOriginal: "Erro no Scraper (Puppeteer)",
+            tituloOriginal: "Erro no Scraper (chrome-aws-lambda)",
             descricaoOriginal: `Falha ao extrair dados: ${error.message}`,
             precoOriginal: "Erro",
             categoriaOriginal: "Erro",
@@ -223,9 +189,9 @@ async function scrapeShopeeProduct(url) {
         };
     } finally {
         if (browser) {
-            console.log(`[Scraper Puppeteer] Fechando browser...`);
+            console.log(`[Scraper chrome-aws-lambda] Fechando browser...`);
             await browser.close();
-            console.log(`[Scraper Puppeteer] Browser fechado.`);
+            console.log(`[Scraper chrome-aws-lambda] Browser fechado.`);
         }
     }
 }
