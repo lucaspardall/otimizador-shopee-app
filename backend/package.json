@@ -1,28 +1,28 @@
-{
-  "name": "otimizador-shopee-backend",
-  "version": "1.0.0",
-  "description": "Backend para o Otimizador Inteligente Shopee",
-  "main": "server.js",
-  "scripts": {
-    "start": "node server.js",
-    "build": "npx puppeteer browsers install chrome --path /tmp/puppeteer-cache",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "dependencies": {
-    "axios": "^1.7.2",
-    "cors": "^2.8.5",
-    "express": "^4.19.2",
-    "puppeteer": "^22.10.0"
-  },
-  "keywords": [
-    "shopee",
-    "otimizador",
-    "api",
-    "puppeteer"
-  ],
-  "author": "Seu Nome Aqui",
-  "license": "ISC",
-  "engines": {
-    "node": ">=18.0.0"
-  }
-}
+   {
+     "name": "otimizador-shopee-backend",
+     "version": "1.0.0",
+     "description": "Backend para o Otimizador Inteligente Shopee",
+     "main": "server.js",
+     "scripts": {
+       "start": "node server.js",
+       "test": "echo \"Error: no test specified\" && exit 1"
+     },
+     "dependencies": {
+       "axios": "^1.7.2",
+       "cors": "^2.8.5",
+       "express": "^4.19.2",
+       "puppeteer": "^22.10.0"
+     },
+     "keywords": [
+       "shopee",
+       "otimizador",
+       "api",
+       "puppeteer"
+     ],
+     "author": "Seu Nome Aqui",
+     "license": "ISC",
+     "engines": {
+       "node": ">=18.0.0"
+     }
+   }
+   
